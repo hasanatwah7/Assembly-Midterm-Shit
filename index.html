@@ -1,0 +1,2613 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VECTR // CS214P Assembly — منصة الميدتيرم الشاملة (محاضرات 1–4 + ميد 2025)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            obsidian: '#050608',
+            cardDark: '#0B0F17',
+            borderDark: '#1E293B'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+      background-color: #050608;
+      color: #f1f5f9;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+    html:not(.dark) body {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    html:not(.dark) .glass-panel {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+    }
+    html:not(.dark) .sub-card {
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    html:not(.dark) .text-slate-300,
+    html:not(.dark) .text-slate-200,
+    html:not(.dark) .text-gray-300,
+    html:not(.dark) .text-gray-200 {
+      color: #1e293b !important;
+    }
+    html:not(.dark) .text-slate-400,
+    html:not(.dark) .text-gray-400 {
+      color: #475569 !important;
+    }
+    .ltr-chip {
+      direction: ltr;
+      unicode-bidi: isolate;
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .ltr-block {
+      direction: ltr;
+      unicode-bidi: isolate;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .nav-header {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+    }
+    .nav-hidden {
+      transform: translateY(-100%);
+    }
+    .module-btn.active {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #000000;
+      font-weight: 800;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+    .subtab-btn.active {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+    html:not(.dark) .subtab-btn.active {
+      background: #fef3c7;
+      color: #b45309;
+      border-color: #f59e0b;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #050608; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+  </style>
+</head>
+<body class="min-h-screen pb-20 selection:bg-amber-500/30 selection:text-amber-200" id="appBody">
+
+  <!-- Auto-Hiding Sticky Top Header -->
+  <header id="mainHeader" class="nav-header sticky top-0 z-50 border-b border-white/10 bg-[#050608]/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col gap-2.5">
+      <!-- Top Row: Brand + Global Search + Speedrun + Theme -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-600 flex items-center justify-center shadow-lg shadow-amber-500/20 font-mono font-extrabold text-black text-sm shrink-0">
+            8086
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="ltr-chip text-[11px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">VECTR // CS214P HUB</span>
+              <span class="text-xs text-slate-400">د. سارة المتولي — جامعة المنصورة</span>
+            </div>
+            <h1 class="text-sm sm:text-base font-black tracking-tight mt-0.5">الموقع الشامل لميدتيرم الأسمبلي (محاضرات 1–4 + المختبر + ميد 2025)</h1>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+          <div class="relative w-full sm:w-64">
+            <input id="globalSearchInput" type="text" placeholder="ابحث في الموقع كله (INT 21, DUP, 0F19)..."
+              class="w-full bg-white/[0.04] border border-white/15 focus:border-amber-500 rounded-xl px-3.5 py-1.5 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition" />
+            <button type="button" id="clearSearchBtn" class="hidden absolute left-2.5 top-1.5 text-xs text-rose-400 font-bold px-1.5 py-0.5 rounded bg-rose-500/10">مسح</button>
+          </div>
+
+          <button type="button" id="openSpeedrunBtn" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-extrabold text-xs whitespace-nowrap shadow-lg shadow-emerald-500/20 hover:opacity-95 transition">
+            ⚡ Speedrun (67 سؤال)
+          </button>
+
+          <button type="button" id="themeToggleBtn" class="px-2.5 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-amber-400 transition text-xs font-mono font-bold shrink-0" title="تغيير المظهر">
+            <span id="themeLabel">LIGHT</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Main Module Switcher -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto pb-1" aria-label="Main Modules">
+        <button type="button" data-module="lec1" class="module-btn active px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border border-white/10 bg-white/[0.03] text-slate-200 whitespace-nowrap transition flex items-center gap-1.5">
+          <span>1. المحاضرة الأولى</span>
+          <span class="ltr-chip text-[10px] px-1.5 py-0.2 rounded bg-black/25">8086 &amp; Memory</span>
+        </button>
+        <button type="button" data-module="lec2" class="module-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border border-white/10 bg-white/[0.03] text-slate-200 whitespace-nowrap transition flex items-center gap-1.5">
+          <span>2. المحاضرة الثانية</span>
+          <span class="ltr-chip text-[10px] px-1.5 py-0.2 rounded bg-black/25">Addressing, Flags &amp; Stack</span>
+        </button>
+        <button type="button" data-module="lec34" class="module-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border border-white/10 bg-white/[0.03] text-slate-200 whitespace-nowrap transition flex items-center gap-1.5">
+          <span>3. المحاضرة 3 و 4</span>
+          <span class="ltr-chip text-[10px] px-1.5 py-0.2 rounded bg-black/25">DEBUG, INT &amp; Directives</span>
+        </button>
+        <button type="button" data-module="labs" class="module-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border border-white/10 bg-white/[0.03] text-slate-200 whitespace-nowrap transition flex items-center gap-1.5">
+          <span>4. الحاسبات والمحاكي التفاعلي</span>
+          <span class="ltr-chip text-[10px] px-1.5 py-0.2 rounded bg-black/25">All-in-One Lab</span>
+        </button>
+        <button type="button" data-module="mid2025" class="module-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border border-white/10 bg-white/[0.03] text-slate-200 whitespace-nowrap transition flex items-center gap-1.5">
+          <span>5. ميدتيرم 2025 + بنك الـ 67 سؤال</span>
+          <span class="ltr-chip text-[10px] px-1.5 py-0.2 rounded bg-rose-500/30 text-rose-200">SOLVED</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Search Notice Banner -->
+  <div id="searchStatusBanner" class="hidden max-w-7xl mx-auto px-4 pt-4">
+    <div class="p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-between text-xs sm:text-sm">
+      <span>🔍 وضع البحث الشامل مفعّل: يتم الآن عرض جميع الأقسام والأسئلة المطابقة لبحثك في صفحة واحدة.</span>
+      <button type="button" id="exitSearchModeBtn" class="px-3 py-1 rounded-lg bg-amber-500 text-black font-bold text-xs">إغلاق البحث</button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-10">
+
+    <!-- =====================================================================
+         MODULE 1: LECTURE 1 (BASIC CONCEPTS, MEMORY, LITTLE-ENDIAN, 8086)
+         ===================================================================== -->
+    <section id="mod-lec1" class="module-section space-y-6">
+      <!-- Module 1 Header & Sub-tabs -->
+      <div class="glass-panel rounded-2xl border border-amber-500/30 bg-gradient-to-l from-amber-500/10 via-white/[0.02] to-transparent p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="ltr-chip text-xs font-bold text-amber-400 uppercase tracking-widest">MODULE 01 // LECTURE 1 COMPLETE</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold mt-1">المحاضرة الأولى: القوانين وبصمجة المسائل وخلاصة النظري</h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">تشمل الـ 5 أنماط الأساسية لمسائل الميموري والـ <span class="ltr-chip">Address/Data Bus</span> والـ <span class="ltr-chip">Little-Endian</span> ومعمارية <span class="ltr-chip">Intel 8086</span>.</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5 shrink-0">
+          <button type="button" data-subtarget="lec1-formulas" class="lec1-subbtn subtab-btn active px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">1. القوانين وبصمجة المسائل</button>
+          <button type="button" data-subtarget="lec1-theory" class="lec1-subbtn subtab-btn px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">2. خلاصة النظري للميد</button>
+          <button type="button" data-JumpModule="labs" class="jump-module-btn px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition">3. حاسبة المسائل &larr;</button>
+          <button type="button" data-JumpQuiz="lec1" class="jump-quiz-btn px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-extrabold transition">4. كويز محاضرة 1 (12 سؤال)</button>
+        </div>
+      </div>
+
+      <!-- Lec 1 Sub-View A: Formulas & Problem Solving -->
+      <div id="lec1-formulas" class="lec1-subview space-y-6">
+        <!-- Power of 2 Cheat Bar -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <h3 class="text-base font-bold text-amber-400">جدول تحويلات قوى الرقم 2 (مفتاح حل كل مسائل الميموري بدون آلة حاسبة)</h3>
+            <span class="ltr-chip text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">MUST MEMORIZE</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300 mb-4">
+            السر كله إنك تحول أي رقم لـ <span class="ltr-chip text-amber-300 font-bold">2^n</span> وتجمع الأسس في الضرب وتطرحها في القسمة:
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-center">
+              <div class="text-xs text-slate-400">1 Byte</div>
+              <div class="ltr-chip text-sm font-bold text-emerald-400 mt-1">8 bits = 2^3 bits</div>
+            </div>
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-center">
+              <div class="text-xs text-slate-400">1 KB (Kilobyte)</div>
+              <div class="ltr-chip text-sm font-bold text-amber-400 mt-1">2^10 Bytes</div>
+            </div>
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-center">
+              <div class="text-xs text-slate-400">1 MB (Megabyte)</div>
+              <div class="ltr-chip text-sm font-bold text-amber-400 mt-1">2^20 Bytes</div>
+            </div>
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-center">
+              <div class="text-xs text-slate-400">1 GB (Gigabyte)</div>
+              <div class="ltr-chip text-sm font-bold text-amber-400 mt-1">2^30 Bytes</div>
+            </div>
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-center">
+              <div class="text-xs text-slate-400">أرقام مشهورة (1)</div>
+              <div class="ltr-chip text-xs font-bold text-sky-400 mt-1">2=2^1, 4=2^2, 8=2^3, 16=2^4</div>
+            </div>
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-center">
+              <div class="text-xs text-slate-400">أرقام مشهورة (2)</div>
+              <div class="ltr-chip text-xs font-bold text-sky-400 mt-1">32=2^5, 64=2^6, 128=2^7, 256=2^8</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 1: Memory Size & Address Bus -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
+            <div>
+              <span class="ltr-chip text-xs font-bold text-amber-400">PATTERN #01 // SLIDES 18, 19, 22</span>
+              <h3 class="text-lg font-extrabold mt-0.5">مسائل حساب <span class="ltr-chip">Memory Size in Words</span> وعدد بتات الـ <span class="ltr-chip">Address Bus</span></h3>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30 font-bold">سؤال مضمون في الميدتيرم</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="sub-card p-4 rounded-xl bg-black/50 border border-amber-500/30">
+              <div class="text-xs font-bold text-amber-400 mb-2">القانون الأول: عدد الـ Words في الميموري</div>
+              <div class="ltr-block text-sm font-bold text-white bg-slate-900 p-3 rounded-lg border border-white/10">
+                memory size in words = (memory size in bits) / (word size in bits)
+              </div>
+              <p class="text-xs text-slate-300 mt-2">
+                <strong>بصمجة سريعة:</strong> تقدر تقسم بالـ <span class="ltr-chip">bits</span> زي السلايد، أو تقسم <span class="ltr-chip">(memory size in bytes) / (word size in bytes)</span> مباشرة لأن الـ <span class="ltr-chip">2^3</span> بتطير من فوق وتحت!
+              </p>
+            </div>
+
+            <div class="sub-card p-4 rounded-xl bg-black/50 border border-emerald-500/30">
+              <div class="text-xs font-bold text-emerald-400 mb-2">القانون التاني: عدد الـ Bits للـ Address Bus</div>
+              <div class="ltr-block text-sm font-bold text-white bg-slate-900 p-3 rounded-lg border border-white/10">
+                If memory size in words = 2^n words &rArr; # bits for address = n bits
+              </div>
+              <p class="text-xs text-slate-300 mt-2">
+                <strong>بصمجة سريعة:</strong> أول ما تطلع عدد الـ <span class="ltr-chip">words</span> على صورة <span class="ltr-chip">2^n</span>، خد الأس <span class="ltr-chip">n</span> اللي فوق الـ <span class="ltr-chip">2</span> زي ما هو وقوله ده عدد بتات الـ <span class="ltr-chip">Address Bus</span>!
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <div class="sub-card p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-2">
+              <div class="text-xs font-bold text-sky-400">مثال السلايد الأساسي (Intel 8086):</div>
+              <p class="text-xs text-slate-300">المعطيات: <span class="ltr-chip">Memory = 1 MB</span>، و <span class="ltr-chip">Word size = 1 byte (8 bits)</span>.</p>
+              <div class="ltr-block text-xs space-y-1 bg-slate-900 p-3 rounded-lg border border-white/5 text-slate-200">
+                <div>1) Memory in bits = 1 MB = 2^10 &times; 2^10 &times; 2^3 bits = 2^23 bits</div>
+                <div>2) Word size in bits = 1 byte = 8 bits = 2^3 bits</div>
+                <div>3) Memory size in words = (2^10 &times; 2^10 &times; 2^3) / 2^3 = 2^20 words</div>
+                <div class="text-emerald-400 font-bold">4) # bits for address = 20 bits</div>
+              </div>
+            </div>
+
+            <div class="sub-card p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-2">
+              <div class="text-xs font-bold text-amber-400">تريكة الميدتيرم (لو غيرت الأرقام):</div>
+              <p class="text-xs text-slate-300">المعطيات: <span class="ltr-chip">Memory = 4 MB</span>، و <span class="ltr-chip">Word size = 2 bytes (16 bits)</span>.</p>
+              <div class="ltr-block text-xs space-y-1 bg-slate-900 p-3 rounded-lg border border-white/5 text-slate-200">
+                <div>1) Memory in bits = 4 MB = 2^2 &times; 2^20 &times; 2^3 = 2^25 bits</div>
+                <div>2) Word size in bits = 2 bytes = 16 bits = 2^4 bits</div>
+                <div>3) Memory size in words = 2^25 / 2^4 = 2^(25 - 4) = 2^21 words</div>
+                <div class="text-amber-400 font-bold">4) # bits for address = 21 bits</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 2: Words Fetched at a Time -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
+            <div>
+              <span class="ltr-chip text-xs font-bold text-amber-400">PATTERN #02 // SLIDE 22</span>
+              <h3 class="text-lg font-extrabold mt-0.5">مسائل <span class="ltr-chip">How many words can be fetched from memory at a time?</span></h3>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold">تريكة Data Bus</span>
+          </div>
+
+          <div class="sub-card p-4 rounded-xl bg-black/50 border border-amber-500/30">
+            <div class="ltr-block text-sm sm:text-base font-bold text-white bg-slate-900 p-3 rounded-lg border border-white/10">
+              Words fetched at a time = (Data Bus Size in bits) / (Word Size in bits)
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 mt-3">
+              <strong>خطوات البصمجة:</strong> اللي بيشيل الداتا من الميموري للـ <span class="ltr-chip">CPU</span> هو الـ <span class="ltr-chip">Data Bus</span> (مش الـ Address Bus!). شوف عرض الـ <span class="ltr-chip">Data Bus</span> كام بت، واقسمه على حجم الـ <span class="ltr-chip">Word</span> الواحدة بالـ بت:
+            </p>
+            <ul class="text-xs sm:text-sm text-slate-200 mt-2 space-y-1.5 list-disc list-inside">
+              <li>في الـ <strong>Intel 8086</strong>: عندنا <span class="ltr-chip">Data bus = 16 bits</span> و <span class="ltr-chip">Word size = 1 byte = 8 bits</span> &larr; إذن <span class="ltr-chip">16 / 8 = 2 words</span>.</li>
+              <li>لو جالك في الامتحان <span class="ltr-chip">Data bus = 32 bits</span> و <span class="ltr-chip">Word size = 1 byte (8 bits)</span> &larr; إذن <span class="ltr-chip">32 / 8 = 4 words</span>.</li>
+              <li>لو جالك <span class="ltr-chip">Data bus = 16 bits</span> و <span class="ltr-chip">Word size = 2 bytes (16 bits)</span> &larr; إذن <span class="ltr-chip">16 / 16 = 1 word</span>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Pattern 3: Little-Endian Storage -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
+            <div>
+              <span class="ltr-chip text-xs font-bold text-amber-400">PATTERN #03 // SLIDE 25 &amp; MID 2025 Q11</span>
+              <h3 class="text-lg font-extrabold mt-0.5">مسائل تخزين الداتا بطريقة <span class="ltr-chip">Little-Endian</span> في الـ <span class="ltr-chip">Memory</span></h3>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold">سؤال رسم أو اختياري</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2 space-y-3">
+              <div class="sub-card p-4 rounded-xl bg-black/50 border border-white/10 space-y-2">
+                <div class="text-sm font-bold text-amber-400">القاعدة الذهبية للبصمجة:</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  معالجات <span class="ltr-chip">Intel x86</span> بتستخدم <span class="ltr-chip font-bold text-emerald-400">Little-endian</span>. كل بايت بيتكون من <strong>رقمين Hex</strong> (لأن <span class="ltr-chip">2 Hex digits = 8 bits = 1 byte</span>):
+                </p>
+                <ul class="text-xs sm:text-sm text-slate-300 space-y-1.5 list-disc list-inside">
+                  <li><strong>كم Word بنحتاج؟</strong> الرقم <span class="ltr-chip">0529H</span> (أو <span class="ltr-chip">2529H</span> في ميد 2025) فيه 4 خانات Hex يعني <span class="ltr-chip">2 bytes</span> = محتاجين <span class="ltr-chip font-bold text-amber-300">2 words</span>.</li>
+                  <li><strong>في الـ Register (<span class="ltr-chip">Queue</span>):</strong> بيتخزن معدول زي ما هو: <span class="ltr-chip">[ 05 | 29 ]</span>.</li>
+                  <li><strong>في الـ Memory (<span class="ltr-chip">Stack</span>):</strong> البايت اليمين الصغير (<span class="ltr-chip">Low Byte = 29</span>) بيسكن في <strong>العنوان الأصغر</strong> (<span class="ltr-chip">04A26</span>)، والبايت الشمال الكبير (<span class="ltr-chip">High Byte = 05</span>) بيسكن في <strong>العنوان الأكبر</strong> (<span class="ltr-chip">04A27</span>).</li>
+                  <li class="text-rose-400 font-semibold">تحذير: إوعى تعكس الرقمين اللي جوه نفس البايت! يعني <span class="ltr-chip">29</span> تفضل <span class="ltr-chip">29</span> مش <span class="ltr-chip">92</span>!</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="sub-card p-4 rounded-xl bg-slate-900 border border-white/10 flex flex-col justify-between text-white">
+              <div class="text-xs font-bold text-center text-slate-400 mb-2">تمثيل <span class="ltr-chip text-amber-400">0529H</span> (Slide 25)</div>
+              <div class="space-y-2">
+                <div class="text-xs text-slate-400">Memory (Stack):</div>
+                <div class="ltr-block text-xs space-y-1">
+                  <div class="flex items-center justify-between bg-sky-500/15 border border-sky-500/40 px-3 py-1.5 rounded">
+                    <span class="text-rose-400 font-bold">04A27 (Higher)</span>
+                    <span class="text-amber-300 font-extrabold text-sm">05</span>
+                  </div>
+                  <div class="flex items-center justify-between bg-sky-500/15 border border-sky-500/40 px-3 py-1.5 rounded">
+                    <span class="text-rose-400 font-bold">04A26 (Lower)</span>
+                    <span class="text-emerald-300 font-extrabold text-sm">29</span>
+                  </div>
+                </div>
+                <div class="text-xs text-slate-400 pt-2">Register (Queue):</div>
+                <div class="ltr-block grid grid-cols-2 gap-1 text-center text-sm font-extrabold">
+                  <div class="bg-amber-500/20 border border-amber-500/40 py-1.5 rounded text-amber-300">05 (High)</div>
+                  <div class="bg-emerald-500/20 border border-emerald-500/40 py-1.5 rounded text-emerald-300">29 (Low)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 4 & 5 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <span class="ltr-chip text-xs font-bold text-amber-400">PATTERN #04 // SLIDES 26–28</span>
+            <h3 class="text-base sm:text-lg font-extrabold">حساب <span class="ltr-chip">Absolute Address</span> وجمع الـ <span class="ltr-chip">Hex</span></h3>
+            <div class="ltr-block text-xs sm:text-sm font-bold text-white bg-slate-900 p-3 rounded-lg border border-white/10">
+              Absolute Address = (Segment &times; 10H) + Offset
+              <br/>04F03H = 04F00H + 0003H
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <strong>إزاي تجمع Hex من غير غلطة؟</strong> لو المجموع طلع من <span class="ltr-chip">10..15</span> حوله لحرف (<span class="ltr-chip">A..F</span>). لو طلع <strong>16 أو أكتر</strong> اطرح منه <span class="ltr-chip">16</span> واكتب الناتج وارفع <span class="ltr-chip">1 Carry</span> للخانة اللي على شمالها! (مثلاً <span class="ltr-chip">04C00H + 04A2H = 050A2H</span> لأن <span class="ltr-chip">C(12)+4 = 16 &rarr; 0</span> ومعانا 1).
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <span class="ltr-chip text-xs font-bold text-amber-400">PATTERN #05 // SLIDES 16, 17, 19</span>
+            <h3 class="text-base sm:text-lg font-extrabold">التحويل اللحظي <span class="ltr-chip">Binary &harr; Hex (8-4-2-1)</span> والعد</h3>
+            <div class="ltr-block text-xs bg-slate-900 p-3 rounded-lg border border-white/10 text-slate-200">
+              0001 0001 0010 0010 1111 (20-bit Binary)<br/>
+              &nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;F &rArr; 0x1122F (Slide 19)
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <strong>تريكة العد في العناوين (Slide 17):</strong> العنوان اللي بعد <span class="ltr-chip font-bold text-amber-400">0049H</span> بالـ Hex هو <span class="ltr-chip font-bold text-emerald-400">004AH</span> (مش <span class="ltr-chip">0050H</span>!)، والعنوان اللي بعد <span class="ltr-chip">004FH</span> هو <span class="ltr-chip">0050H</span>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lec 1 Sub-View B: Theory Summary -->
+      <div id="lec1-theory" class="lec1-subview hidden space-y-6">
+        <!-- Levels of Programming -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+          <h3 class="text-base sm:text-lg font-bold text-amber-400">1. مقارنة <span class="ltr-chip">Levels of Programming</span> (Slides 13 &amp; 14)</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm text-right border-collapse">
+              <thead>
+                <tr class="border-b border-white/15 bg-white/[0.04] text-amber-400">
+                  <th class="p-3">المستوى (Level)</th>
+                  <th class="p-3">التعريف في السلايد (Slide Definition)</th>
+                  <th class="p-3">العلاقة مع الـ Machine Code</th>
+                  <th class="p-3">أداة الترجمة (Translator)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/10">
+                <tr>
+                  <td class="p-3 font-bold"><span class="ltr-chip text-emerald-400">Machine language</span></td>
+                  <td class="p-3">Instructions in a sequence of ones and zeros (<span class="ltr-chip">1s and 0s</span>) that the processor executes <strong>one at a time</strong>.</td>
+                  <td class="p-3">هي نفسها لغة المعالج المباشرة</td>
+                  <td class="p-3">لا تحتاج مترجم (ينفذها الـ Processor مباشرة)</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-bold"><span class="ltr-chip text-amber-400">Low-level assembly language</span></td>
+                  <td class="p-3">Instructions in a <strong>symbolic format</strong> designed for a <strong>specific processor</strong>.</td>
+                  <td class="p-3 font-bold text-amber-400"><span class="ltr-chip">One-to-One (1:1)</span></td>
+                  <td class="p-3"><span class="ltr-chip font-bold">Assembler</span></td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-bold"><span class="ltr-chip text-sky-400">High-level language</span></td>
+                  <td class="p-3">Designed to <strong>eliminate the technicality of low level hardware details</strong>.</td>
+                  <td class="p-3 font-bold text-sky-400"><span class="ltr-chip">One-to-Many (1:N)</span></td>
+                  <td class="p-3"><span class="ltr-chip font-bold">Compiler</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 8086 Specs & EU vs BIU -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <h3 class="text-base font-bold text-amber-400">2. مواصفات <span class="ltr-chip">Intel 8086 (x86)</span> القياسية (Slide 22)</h3>
+            <ul class="space-y-2 text-xs sm:text-sm">
+              <li class="sub-card flex justify-between p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span class="text-slate-300">حجم المسجلات (<span class="ltr-chip">Registers</span>):</span>
+                <span class="ltr-chip font-bold text-amber-400">16-bit registers</span>
+              </li>
+              <li class="sub-card flex justify-between p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span class="text-slate-300">عرض ناقل البيانات (<span class="ltr-chip">Data bus</span>):</span>
+                <span class="ltr-chip font-bold text-amber-400">16-bit data bus</span>
+              </li>
+              <li class="sub-card flex justify-between p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span class="text-slate-300">حجم الذاكرة الداخلية (<span class="ltr-chip">Internal memory</span>):</span>
+                <span class="ltr-chip font-bold text-emerald-400">1 MB (2^20 bytes)</span>
+              </li>
+              <li class="sub-card flex justify-between p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span class="text-slate-300">حجم الكلمة في الميموري (<span class="ltr-chip">Word size</span>):</span>
+                <span class="ltr-chip font-bold text-emerald-400">1 byte (8 bits)</span>
+              </li>
+              <li class="sub-card flex justify-between p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span class="text-slate-300">عرض ناقل العناوين (<span class="ltr-chip">Address bus</span>):</span>
+                <span class="ltr-chip font-bold text-rose-400">20 bits</span>
+              </li>
+              <li class="sub-card flex justify-between p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <span class="text-slate-300">عدد الكلمات المسحوبة معاً (<span class="ltr-chip">Fetched at a time</span>):</span>
+                <span class="ltr-chip font-bold text-sky-400">2 words</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <h3 class="text-base font-bold text-sky-400">3. مقارنة <span class="ltr-chip">EU</span> ضد <span class="ltr-chip">BIU</span> جوه الـ 8086 (Slide 23)</h3>
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="sub-card p-3 rounded-xl bg-black/40 border border-amber-500/30">
+                <div class="font-bold text-amber-400 mb-1"><span class="ltr-chip">EU (Execution Unit)</span> — فك وتنفيذ الأوامر:</div>
+                <ul class="list-disc list-inside text-slate-200 space-y-0.5">
+                  <li><strong>General Registers:</strong> <span class="ltr-chip">AH/AL (AX), BH/BL (BX), CH/CL (CX), DH/DL (DX)</span></li>
+                  <li><strong>Pointer &amp; Index Registers:</strong> <span class="ltr-chip">SP, BP, SI, DI</span></li>
+                  <li><span class="ltr-chip">ALU (Arithmetic and Logic Unit)</span> &amp; <span class="ltr-chip">CU (Control Unit)</span> &amp; <span class="ltr-chip">Flags</span></li>
+                </ul>
+              </div>
+              <div class="sub-card p-3 rounded-xl bg-black/40 border border-sky-500/30">
+                <div class="font-bold text-sky-400 mb-1"><span class="ltr-chip">BIU (Bus Interface Unit)</span> — التواصل مع الميموري وجلب الأوامر:</div>
+                <ul class="list-disc list-inside text-slate-200 space-y-0.5">
+                  <li><strong>Segment Registers:</strong> <span class="ltr-chip">CS, DS, SS, ES</span></li>
+                  <li><span class="ltr-chip">Instruction Pointer (IP)</span> &amp; <span class="ltr-chip">Bus Control Unit</span></li>
+                  <li><span class="ltr-chip">Instruction Queue (1..n)</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1MB Memory Map & CPU Cycle -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h3 class="text-base sm:text-lg font-bold text-emerald-400">4. خريطة الذاكرة <span class="ltr-chip">1 MB Memory Map</span> (Slide 24) + دورة الـ CPU</h3>
+            <span class="ltr-chip text-xs px-2.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">640K RAM + 128K Video + 256K ROM = 1024K (1 MB)</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <div class="sub-card p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="font-extrabold text-rose-400"><span class="ltr-chip">ROM (256K)</span></span>
+                <span class="ltr-chip text-xs px-2 py-0.5 rounded bg-black/40 text-rose-200">C0000h &rarr; FFFFFh</span>
+              </div>
+              <p class="text-slate-300">مقسومة إلى: <span class="ltr-chip font-bold">64K</span> base system ROM + <span class="ltr-chip font-bold">192K</span> memory expansion area ROM.</p>
+            </div>
+            <div class="sub-card p-4 rounded-xl bg-sky-500/10 border border-sky-500/30 space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="font-extrabold text-sky-400"><span class="ltr-chip">Video Display RAM (128K)</span></span>
+                <span class="ltr-chip text-xs px-2 py-0.5 rounded bg-black/40 text-sky-200">A0000h &rarr; BFFFFh</span>
+              </div>
+              <p class="text-slate-300">مخصصة لعرض البيانات على الشاشة (<span class="ltr-chip">Display</span>).</p>
+            </div>
+            <div class="sub-card p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="font-extrabold text-emerald-400"><span class="ltr-chip">RAM (640K)</span></span>
+                <span class="ltr-chip text-xs px-2 py-0.5 rounded bg-black/40 text-emerald-200">00000h &rarr; 9FFFFh</span>
+              </div>
+              <p class="text-slate-300">تبدأ من تحت خالص بـ <span class="ltr-chip font-bold">Interrupt Vector Table</span> ثم <span class="ltr-chip font-bold">BIOS data area</span>.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 text-xs sm:text-sm">
+            <div class="sub-card p-3.5 rounded-xl bg-black/40 border border-white/10">
+              <span class="font-bold text-amber-400">دورة تنفيذ الأمر (CPU Execution Cycle):</span>
+              <span class="ltr-chip font-bold text-white mr-2">1. Fetch &rarr; 2. Decode &rarr; 3. Execute</span>
+              <div class="text-slate-300 mt-1">قنوات الـ System Bus الثلاثة: <span class="ltr-chip text-amber-300">Address Bus</span>، <span class="ltr-chip text-emerald-300">Data Bus</span>، <span class="ltr-chip text-sky-300">Control Bus</span>.</div>
+            </div>
+            <div class="sub-card p-3.5 rounded-xl bg-black/40 border border-white/10">
+              <span class="font-bold text-emerald-400">أهمية الأسمبلي و <span class="ltr-chip">SSE</span> (Slides 9–12):</span>
+              <div class="text-slate-300 mt-1">أقل استهلاك ميموري وأسرع وقت (<span class="ltr-chip">recode time-critical sections</span>). أوامر <span class="ltr-chip font-bold">SSE</span> تعمل على مسجلات <span class="ltr-chip font-bold">128-bit</span> للتنفيذ المتوازي. الاستخدامات: <span class="ltr-chip">Device drivers, Embedded &amp; Real-time systems</span>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         MODULE 2: LECTURE 2 (ADDRESSING, FLAGS, STACK, INSTRUCTION EXECUTION)
+         ===================================================================== -->
+    <section id="mod-lec2" class="module-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl border border-sky-500/30 bg-gradient-to-l from-sky-500/10 via-white/[0.02] to-transparent p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="ltr-chip text-xs font-bold text-sky-400 uppercase tracking-widest">MODULE 02 // LECTURE 2 COMPLETE</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold mt-1">المحاضرة الثانية: الـ Addressing والـ Flags والـ Stack وتنفيذ الأوامر</h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">الـ 6 أنماط لمسائل المحاضرة التانية + جدول الثوابت والعناوين المحفوظة (<span class="ltr-chip">BIOS, IVT, PSP, .COM vs .EXE</span>).</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5 shrink-0">
+          <button type="button" data-subtarget="lec2-patterns" class="lec2-subbtn subtab-btn active px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">1. الـ 6 أنواع مسائل وبصمجتها</button>
+          <button type="button" data-subtarget="lec2-constants" class="lec2-subbtn subtab-btn px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">2. ثوابت وأرقام البصمجة</button>
+          <button type="button" data-JumpModule="labs" class="jump-module-btn px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition">3. محاكي الـ Flags والـ Stack &larr;</button>
+          <button type="button" data-JumpQuiz="lec2" class="jump-quiz-btn px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-extrabold transition">4. كويز محاضرة 2 (15 سؤال)</button>
+        </div>
+      </div>
+
+      <!-- Lec 2 Sub-View A: 6 Problem Patterns -->
+      <div id="lec2-patterns" class="lec2-subview grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Pattern 1 -->
+        <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">النوع الأول — مضمون 100%</span>
+              <span class="ltr-chip text-xs text-slate-400">Slides 5, 9, 10</span>
+            </div>
+            <h3 class="text-lg font-bold">1. حساب الـ <span class="ltr-chip text-sky-400">Actual / Absolute Address</span></h3>
+            <div class="p-3 rounded-xl bg-slate-900 text-emerald-400 ltr-block text-xs sm:text-sm border border-slate-800">
+              <div>Segment Start Address = Segment_Reg &times; 10H (Append 0 on right)</div>
+              <div class="mt-1 font-bold text-white">Actual Address (20-bit) = Segment_Reg[0]H + Offset</div>
+            </div>
+            <ul class="list-disc list-inside text-xs sm:text-sm space-y-1 text-slate-300">
+              <li>خد رقم الـ <span class="ltr-chip">Segment</span> (4 أرقام Hex) وحط على يمينه صفر <span class="ltr-chip">0</span> عشان يبقى 5 أرقام، ثم اجمع الـ <span class="ltr-chip">Offset</span>.</li>
+              <li>لو مكتوب <span class="ltr-chip">DS = 038E(0)H</span>، الصفر اللي بين قوسين ده هو الصفر اللي حطيناه أصلاً، <strong>إوعى تحط صفر تاني!</strong></li>
+            </ul>
+          </div>
+          <div class="sub-card p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs space-y-1">
+            <div class="font-bold text-sky-400">📌 مثال السلايد المحلول:</div>
+            <div class="ltr-block text-slate-200">
+              Given: DS = 038EH, Offset = 0032H &rArr; 038E0H + 0032H = 03912H
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 2 -->
+        <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">النوع الثاني — عكس القانون</span>
+              <span class="ltr-chip text-xs text-slate-400">Slide 11</span>
+            </div>
+            <h3 class="text-lg font-bold">2. استخراج <span class="ltr-chip text-purple-400">Segment : Offset</span> من <span class="ltr-chip">Actual Address</span></h3>
+            <div class="p-3 rounded-xl bg-slate-900 text-purple-300 ltr-block text-xs sm:text-sm border border-slate-800">
+              <div>Offset = Actual_Address - (Segment_Reg &times; 10H)</div>
+              <div class="mt-1 text-xs text-slate-400">* Paragraph boundary: Segment Start rightmost hex digit = 0</div>
+            </div>
+            <ul class="list-disc list-inside text-xs sm:text-sm space-y-1 text-slate-300">
+              <li>لو معاك العنوان وعايز أسهل إجابة: صفّر آخر رقمين أو تلاتة على اليمين وخدهم كـ <span class="ltr-chip">Segment Start</span>، واللي صفّرته حطه في الـ <span class="ltr-chip">Offset</span>.</li>
+              <li>ولو آخر رقم يمين هو أصلاً <span class="ltr-chip">0</span>، تقدر تاخد أول 4 أرقام شمال كـ <span class="ltr-chip">Segment</span> وتخلي <span class="ltr-chip">Offset = 0000H</span>.</li>
+            </ul>
+          </div>
+          <div class="sub-card p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs space-y-1">
+            <div class="font-bold text-purple-400">📌 مثال السلايد المحلول (<span class="ltr-chip">28F30H</span>):</div>
+            <div class="ltr-block text-slate-200">
+              Sol 1: Seg = 28F0H, Off = 0030H (28F0:0030) | Sol 2: Seg = 28F3H, Off = 0000H (28F3:0000)
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 3 -->
+        <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">النوع الثالث — سؤال كلاسيكي</span>
+              <span class="ltr-chip text-xs text-slate-400">Slides 16, 17</span>
+            </div>
+            <h3 class="text-lg font-bold">3. تحليل الـ <span class="ltr-chip text-rose-400">Flag Register Status</span></h3>
+            <div class="p-3 rounded-xl bg-slate-900 text-rose-300 ltr-block text-xs border border-slate-800 overflow-x-auto">
+              <div>Bit:  15  14  13  12 | 11  10   9   8 |  7   6   5   4 |  3   2   1   0</div>
+              <div class="font-bold text-white mt-1">Flag:  -   -   -   - | OF  DF  IF  TF | SF  ZF   -  AF |  -  PF   -  CF</div>
+            </div>
+            <ul class="list-disc list-inside text-xs sm:text-sm space-y-1 text-slate-300">
+              <li><strong>أول 4 بتات (يمين):</strong> الزوجي شغال (<span class="ltr-chip">0=CF, 2=PF, 4=AF</span>) والفردي <span class="ltr-chip">1, 3, 5</span> فاضيين!</li>
+              <li><strong>من البت 6 للبت 11 (6 بتات ورا بعض):</strong> <span class="ltr-chip">6=ZF, 7=SF, 8=TF, 9=IF, 10=DF, 11=OF</span>.</li>
+              <li><strong>آخر 4 بتات (12..15):</strong> كلهم فاضيين!</li>
+            </ul>
+          </div>
+          <div class="sub-card p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs space-y-1">
+            <div class="font-bold text-rose-400">📌 مثال السلايد المحلول (<span class="ltr-chip">0F19H</span>):</div>
+            <div class="ltr-block text-slate-200">
+              0F19H = 0000 | 1111 | 0001 | 1001 &rArr; SET(=1): OF, DF, IF, TF, AF, CF | CLEAR(=0): SF, ZF, PF
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 4 -->
+        <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">النوع الرابع — تتبع Stack</span>
+              <span class="ltr-chip text-xs text-slate-400">Slides 27–34</span>
+            </div>
+            <h3 class="text-lg font-bold">4. مسائل الـ <span class="ltr-chip text-amber-400">Stack Trace (PUSH &amp; POP)</span></h3>
+            <div class="p-3 rounded-xl bg-slate-900 text-amber-300 ltr-block text-xs sm:text-sm border border-slate-800">
+              <div><strong>PUSH Reg16:</strong> 1) SP = SP - 2 &nbsp; 2) [SS:SP] = Low_Byte, [SS:SP+1] = High_Byte</div>
+              <div class="mt-1"><strong>POP  Reg16:</strong> 1) Reg16 = [SS:SP] &nbsp; 2) SP = SP + 2</div>
+            </div>
+            <ul class="list-disc list-inside text-xs sm:text-sm space-y-1 text-slate-300">
+              <li>الـ Stack بينمو لتحت: <span class="ltr-chip">PUSH</span> <strong>بيطرح 2</strong>، و <span class="ltr-chip">POP</span> <strong>بيجمع 2</strong>.</li>
+              <li><strong>فخ جدول السلايد:</strong> لو <span class="ltr-chip">AX = 026B</span> وعملت <span class="ltr-chip">PUSH AX</span> عند <span class="ltr-chip">SP = 34</span>، الخانة <span class="ltr-chip">34</span> بتاخد <span class="ltr-chip">6B</span> والخانة <span class="ltr-chip">35</span> بتاخد <span class="ltr-chip">02</span>، وفي عمود <span class="ltr-chip">Stack frame</span> بتتكتب <span class="ltr-chip font-bold text-rose-400">6B02</span>!</li>
+            </ul>
+          </div>
+          <div class="sub-card p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
+            <div class="font-bold text-amber-400">📌 مثال السلايد المحلول:</div>
+            <div class="ltr-block text-slate-200">
+              AX=026B, BX=04E3, SP=36 &rArr; PUSH AX (SP=34, Frame=6B02) &rArr; PUSH BX (SP=32, Frame=E304)
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 5 -->
+        <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">النوع الخامس — تتبع الكود</span>
+              <span class="ltr-chip text-xs text-slate-400">Slides 37–39</span>
+            </div>
+            <h3 class="text-lg font-bold">5. حساب الـ <span class="ltr-chip text-cyan-400">Next Instruction Address (IP)</span></h3>
+            <div class="p-3 rounded-xl bg-slate-900 text-cyan-300 ltr-block text-xs sm:text-sm border border-slate-800">
+              <div>IP_new = IP_current + Instruction_Size_in_Bytes</div>
+              <div class="mt-1">Next_Instruction_Address = Current_Address + Instruction_Size_in_Bytes</div>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300">
+              <strong>إزاي تعرف حجم الأمر بالـ Bytes؟</strong> عدّ أزواج أرقام الـ Hex في الـ Machine Code! مثلاً <span class="ltr-chip">A01600</span> دول 6 أرقام Hex = <strong>3 Bytes</strong> (<span class="ltr-chip">A0, 16, 00</span>)، يبقى <span class="ltr-chip">IP</span> هيزيد بمقدار <span class="ltr-chip">3</span>!
+            </p>
+          </div>
+          <div class="sub-card p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs space-y-1">
+            <div class="font-bold text-cyan-400">📌 أمثلة السلايدز (37 و 39):</div>
+            <div class="ltr-block text-slate-200">
+              • Start = 05BE0H, Size = 2B &rArr; Next = 05BE2H | • Start = 05C03H, Code = A01600 (3B) &rArr; Next = 05C06H
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern 6 -->
+        <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">النوع السادس — قراءة وكتابة الذاكرة</span>
+              <span class="ltr-chip text-xs text-slate-400">Slides 38, 40 &amp; MID 2025 Q12</span>
+            </div>
+            <h3 class="text-lg font-bold">6. الفرق بين <span class="ltr-chip text-indigo-400">8-bit (AL/DL)</span> و <span class="ltr-chip text-indigo-400">16-bit (AX/DI)</span></h3>
+            <div class="p-3 rounded-xl bg-slate-900 text-indigo-300 ltr-block text-xs sm:text-sm border border-slate-800">
+              <div>• <strong>mov AL, [0016]</strong> &rarr; Transfers 1 byte from DS:0016 into AL</div>
+              <div class="mt-1">• <strong>mov [0016], AX</strong> &rarr; Writes AL into DS:0016, and AH into DS:0017 (2 bytes)</div>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300">
+              لو المسجل 8-bit (<span class="ltr-chip">AL, AH, BL, DL</span>) بينقل <strong>1 Byte</strong>. لو المسجل 16-bit (<span class="ltr-chip">AX, BX, CX, DX, SI, DI, BP, SP</span>) بينقل <strong>2 Bytes</strong>!
+            </p>
+          </div>
+          <div class="sub-card p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-1">
+            <div class="font-bold text-indigo-400">📌 مثال سلايد 40 المحلول:</div>
+            <div class="ltr-block text-slate-200">
+              DS = 05D1H, AX = 0248H, mov [0016], AX &rArr; Addr = 05D26H &rArr; [05D26H]=48, [05D27H]=02
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lec 2 Sub-View B: Constants & Cheat Sheet -->
+      <div id="lec2-constants" class="lec2-subview hidden space-y-6">
+        <div class="glass-panel overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03]">
+          <table class="w-full text-xs sm:text-sm text-right">
+            <thead class="bg-white/[0.05] text-amber-400 border-b border-white/10">
+              <tr>
+                <th class="p-3.5 font-bold">المصطلح / العنصر (<span class="ltr-chip">Item</span>)</th>
+                <th class="p-3.5 font-bold">القيمة / العنوان الثابت (<span class="ltr-chip">Fixed Value / Address</span>)</th>
+                <th class="p-3.5 font-bold">ملاحظة الامتحان المهمة</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">Absolute Address Size</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-sky-400">20-bit (5 Hex Digits)</span></td>
+                <td class="p-3.5">بيشاور مباشرة على مكان محدد في الـ Memory (لحد 1 MB).</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">Paragraph Boundary</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-emerald-400">Divisible by 16 (Decimal) = 10H (Hex)</span></td>
+                <td class="p-3.5">أول رقم يمين بالـ Hex في بداية أي Segment لازم يكون <span class="ltr-chip">0</span>.</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">BIOS Entry Point (Reset State)</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-rose-400">FFFF0H (CS = FFFF[0]H, IP = 0000H)</span></td>
+                <td class="p-3.5">أول عنوان بيتنفذ أول ما تفتح الباور، ومكانه في الـ <span class="ltr-chip">ROM</span>.</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">IVT (Interrupt Vector Table)</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-purple-400">Starts at Location 0 (00000H)</span></td>
+                <td class="p-3.5">بيشيل <span class="ltr-chip">256</span> عنوان، كل عنوان حجمه <span class="ltr-chip">4-byte (segment:offset)</span>.</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">BIOS Data Area</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-amber-400">Starts at Location 40[0]H (00400H)</span></td>
+                <td class="p-3.5">بيحفظ الـ <span class="ltr-chip">status of attached devices</span> بعد الـ IVT مباشرة.</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">PSP (Program Segment Prefix)</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-cyan-400">256-byte (100H bytes)</span></td>
+                <td class="p-3.5">الـ Loader بيحط عنوانها في <strong><span class="ltr-chip">DS</span> و <span class="ltr-chip">ES</span></strong> (جاء في ميد 2025 س15).</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold"><span class="ltr-chip">Meaning of SP = 0</span></td>
+                <td class="p-3.5"><span class="ltr-chip font-bold text-rose-400">Stack is Full (Stack Overflow on next PUSH)</span></td>
+                <td class="p-3.5">لأن الـ Stack بيبدأ من أعلى عنوان في الـ Segment وبينزل لتحت (<span class="ltr-chip">downward</span>) لحد 0.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+            <h3 class="text-base sm:text-lg font-bold text-sky-400">🔑 بصمجة الـ Registers والـ Default Segments (ميد 2025 س5)</h3>
+            <ul class="space-y-2 text-xs sm:text-sm text-slate-200">
+              <li>• <span class="ltr-chip font-bold text-emerald-400">CS : IP</span> &larr; عنوان الأمر الجاي في الـ Code Segment.</li>
+              <li>• <span class="ltr-chip font-bold text-amber-400">SS : SP</span> أو <span class="ltr-chip font-bold text-amber-400">SS : BP</span> &larr; عنوان البيانات في الـ Stack Segment.</li>
+              <li>• <span class="ltr-chip font-bold text-purple-400">DS : BX / SI / DI</span> &larr; المسجلات <span class="ltr-chip">SI, DI, BX</span> تحتوي على Offset يدمج افتراضياً مع <strong><span class="ltr-chip">DS</span></strong>!</li>
+              <li>• <span class="ltr-chip font-bold text-sky-400">AX</span> &larr; شغل الـ <span class="ltr-chip">I/O</span> والـ <span class="ltr-chip">Arithmetic</span>.</li>
+              <li>• <span class="ltr-chip font-bold text-sky-400">DX</span> &larr; شغل الـ <span class="ltr-chip">I/O</span> + ضرب وقسمة الأرقام الكبيرة مع AX (<span class="ltr-chip">DX:AX</span>).</li>
+              <li>• <span class="ltr-chip font-bold text-sky-400">CX</span> &larr; عداد اللوب (<span class="ltr-chip">loop counter</span>) + إزاحة البتات (<span class="ltr-chip">shift bits</span>).</li>
+              <li>• <span class="ltr-chip font-bold text-rose-400">BX</span> &larr; <strong>الوحيد</strong> في الـ General Purpose Registers اللي ينفع في <span class="ltr-chip">indirect addressing [BX]</span>.</li>
+            </ul>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+            <h3 class="text-base sm:text-lg font-bold text-purple-400">⚖️ مقارنة <span class="ltr-chip">.COM</span> ضد <span class="ltr-chip">.EXE</span> + مراحل الـ Boot</h3>
+            <div class="space-y-2.5 text-xs sm:text-sm">
+              <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10">
+                <span class="ltr-chip font-bold text-emerald-400">.COM Program:</span> يتكون من <strong>Segment واحد بس</strong> (<span class="ltr-chip">one segment</span>) يجمع الكود والداتا والـ Stack معاً.
+              </div>
+              <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10">
+                <span class="ltr-chip font-bold text-sky-400">.EXE Program:</span> يتكون من <strong>Segments منفصلة</strong> (<span class="ltr-chip">separate segments</span>) للكود والداتا والـ Stack.
+              </div>
+              <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10">
+                <span class="font-bold text-amber-400">Processor Reset State:</span> يصفر الذاكرة (<span class="ltr-chip">Clear memory locations to zero</span>) ويعمل فحص (<span class="ltr-chip">Parity check</span>) ثم يقفز لـ <span class="ltr-chip">FFFF0H</span> في الـ <span class="ltr-chip">BIOS</span> الذي يهيئ الأجهزة المتصلة.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         MODULE 3: LECTURES 3 & 4 (DEBUG, INTERRUPTS, SYNTAX, DIRECTIVES, BUGS)
+         ===================================================================== -->
+    <section id="mod-lec34" class="module-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl border border-emerald-500/30 bg-gradient-to-l from-emerald-500/10 via-white/[0.02] to-transparent p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="ltr-chip text-xs font-bold text-emerald-400 uppercase tracking-widest">MODULE 03 // LECTURES 3 &amp; 4 COMPLETE</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold mt-1">المحاضرة 3 و 4: الـ DEBUG، الـ Interrupts، الـ Directives وفخاخ الكود</h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">ملخص شامل لأوامر الـ DEBUG، مقاطعات <span class="ltr-chip">INT 21H / INT 16H</span>، شروط التسمية، أنواع الداتا، وتصحيح كود شريحة 35.</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5 shrink-0">
+          <button type="button" data-subtarget="lec34-debug" class="lec34-subbtn subtab-btn active px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">1. الـ DEBUG والـ Interrupts</button>
+          <button type="button" data-subtarget="lec34-syntax" class="lec34-subbtn subtab-btn px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">2. الـ Syntax والـ Directives</button>
+          <button type="button" data-subtarget="lec34-traps" class="lec34-subbtn subtab-btn px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold transition">3. فخاخ الحسابات وتصحيح الكود</button>
+          <button type="button" data-JumpQuiz="lec34" class="jump-quiz-btn px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-extrabold transition">4. الـ 20 سؤال (شريحة 36–37)</button>
+        </div>
+      </div>
+
+      <!-- Lec 34 Sub-View A: DEBUG & Interrupts -->
+      <div id="lec34-debug" class="lec34-subview space-y-6">
+        <!-- 4 Golden Rules of DEBUG -->
+        <div class="glass-panel bg-gradient-to-r from-emerald-950/50 to-slate-900 border border-emerald-500/30 rounded-2xl p-5">
+          <h3 class="text-base sm:text-lg font-black text-emerald-400 mb-3">⚡ 4 ثوابت في برنامج DEBUG لازم تفتكرهم في الامتحان</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs sm:text-sm">
+            <div class="sub-card bg-black/50 p-3 rounded-xl border border-white/10">
+              <span class="text-emerald-400 font-bold block mb-1">1. كل الأرقام Hex تلقائياً</span>
+              لما تكتب <span class="ltr-chip text-amber-300">MOV AX, 25</span> هو بيعتبرها <span class="ltr-chip text-amber-300">0025H</span> من غير ما تكتب H.
+            </div>
+            <div class="sub-card bg-black/50 p-3 rounded-xl border border-white/10">
+              <span class="text-emerald-400 font-bold block mb-1">2. الحروف Capital = Small</span>
+              مبيفرقش بين الحروف الكبيرة والصغيرة نهائياً (<span class="ltr-chip text-amber-300">a 100</span> هي نفسها <span class="ltr-chip text-amber-300">A 100</span>).
+            </div>
+            <div class="sub-card bg-black/50 p-3 rounded-xl border border-white/10">
+              <span class="text-emerald-400 font-bold block mb-1">3. صيغة العنوان</span>
+              أي عنوان بيتكتب على هيئة <span class="ltr-chip text-amber-300">Segment:Offset</span> بفاصل نقطتين فوق بعض (مثل <span class="ltr-chip text-amber-300">DS:200</span>).
+            </div>
+            <div class="sub-card bg-black/50 p-3 rounded-xl border border-white/10">
+              <span class="text-emerald-400 font-bold block mb-1">4. تنفيذ الـ Interrupt</span>
+              لتنفيذ أمر <span class="ltr-chip text-amber-300">INT</span> في الـ Debug بنستخدم الأمر <strong class="text-rose-400 underline">P (Proceed)</strong> مش T!
+            </div>
+          </div>
+        </div>
+
+        <!-- DEBUG Commands Table -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 class="text-base sm:text-lg font-black">🛠️ جدول بصمجة أوامر DEBUG (أول حرف = اسم الأمر)</h3>
+            <span class="text-xs bg-sky-500/20 text-sky-300 px-3 py-1 rounded-lg border border-sky-500/30">موضع 3 أسئلة في ميد 2025!</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm text-right border-collapse">
+              <thead>
+                <tr class="bg-white/[0.05] text-slate-300 border-b border-white/10">
+                  <th class="p-3 w-20 text-center">الأمر</th>
+                  <th class="p-3 w-36">الاختصار</th>
+                  <th class="p-3">بيعمل إيه في الامتحان؟</th>
+                  <th class="p-3 text-left">مثال من المحاضرة</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/10">
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-emerald-400">A</td>
+                  <td class="p-3 font-mono">Assemble</td>
+                  <td class="p-3">كتابة أوامر Assembly رمزية (<span class="ltr-chip text-amber-400">MOV, ADD</span>) وتحويلها لـ Machine Code (ميد 2025 س16).</td>
+                  <td class="p-3 ltr-block text-emerald-400">-A 100</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-rose-400">U</td>
+                  <td class="p-3 font-mono">Unassemble</td>
+                  <td class="p-3"><strong>عكس الـ A:</strong> يفك الـ Machine Code ويرجعه لأوامر Assembly رمزية.</td>
+                  <td class="p-3 ltr-block text-emerald-400">-U 100,102</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-sky-400">D</td>
+                  <td class="p-3 font-mono">Display</td>
+                  <td class="p-3">يعرض محتويات الذاكرة بالـ Hex على الشمال والـ ASCII على اليمين.</td>
+                  <td class="p-3 ltr-block text-emerald-400">-D DS:200</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-amber-400">E</td>
+                  <td class="p-3 font-mono">Enter</td>
+                  <td class="p-3">إدخال قيم أو Machine Code (بايتات Hex) مباشرة جوه الذاكرة.</td>
+                  <td class="p-3 ltr-block text-emerald-400">-E CS:100 B8 23 01</td>
+                </tr>
+                <tr class="bg-purple-500/10">
+                  <td class="p-3 text-center font-mono font-bold text-lg text-purple-400">R</td>
+                  <td class="p-3 font-mono font-bold">Register ⭐</td>
+                  <td class="p-3">يعرض المسجلات أو <strong>يعدل عنوان الـ IP</strong> عبر <span class="ltr-chip font-bold text-amber-400">R IP</span> (ميد 2025 س9).</td>
+                  <td class="p-3 ltr-block text-emerald-400">-R &nbsp; / &nbsp; -R IP</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-teal-400">T</td>
+                  <td class="p-3 font-mono">Trace</td>
+                  <td class="p-3">تنفيذ أمر واحد فقط خطوة بخطوة (Single-step execution).</td>
+                  <td class="p-3 ltr-block text-emerald-400">-T</td>
+                </tr>
+                <tr class="bg-rose-500/10">
+                  <td class="p-3 text-center font-mono font-bold text-lg text-rose-400">P</td>
+                  <td class="p-3 font-mono font-bold">Proceed ⭐</td>
+                  <td class="p-3"><strong>مضمون في الامتحان:</strong> ينفذ الـ <span class="ltr-chip text-amber-400">INT</span> (Interrupt) بالكامل في خطوة واحدة (ميد 2025 س17).</td>
+                  <td class="p-3 ltr-block text-emerald-400">-P</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-green-400">G</td>
+                  <td class="p-3 font-mono">Go</td>
+                  <td class="p-3">تشغيل البرنامج في الذاكرة من عنوان بداية لعنوان توقف.</td>
+                  <td class="p-3 ltr-block text-emerald-400">-G =200 206</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-center font-mono font-bold text-lg text-slate-400">H / N / Q</td>
+                  <td class="p-3 font-mono">Hex / Name / Quit</td>
+                  <td class="p-3"><span class="ltr-chip">H</span> لجمع وطرح رقمين Hex، و <span class="ltr-chip">N</span> لتسمية الملف، و <span class="ltr-chip">Q</span> للخروج.</td>
+                  <td class="p-3 ltr-block text-emerald-400">-H 5 3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Interrupts Cards -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="text-base sm:text-lg font-black text-amber-400 mb-3">🔥 جدول الـ Interrupts والـ PTR (شامل أسئلة ميد 2025 س6، س7، س20)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="sub-card bg-black/50 border border-white/10 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">📅 1. التاريخ (Current Date)</span>
+                <span class="ltr-chip bg-amber-500/20 text-amber-300 text-xs font-bold px-2 py-0.5 rounded">INT 21H / AH=2AH</span>
+              </div>
+              <pre class="ltr-block bg-slate-900 p-2 rounded text-xs text-emerald-400 mb-2">MOV AH, 2A
+INT 21</pre>
+              <ul class="text-xs text-slate-300 space-y-1">
+                <li>• <strong>CX</strong> = السنة بالـ Hex (<span class="ltr-chip">07E3H = 2019</span>)</li>
+                <li>• <strong>DH</strong> = الشهر (<span class="ltr-chip">01H..0CH</span>) | <strong>DL</strong> = اليوم (<span class="ltr-chip">01H..1FH</span>)</li>
+                <li>• <strong>AL</strong> = يوم الأسبوع (<span class="ltr-chip">0 = Sunday</span>)</li>
+              </ul>
+            </div>
+
+            <div class="sub-card bg-black/50 border border-white/10 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">⏰ 2. الوقت (Current Time)</span>
+                <span class="ltr-chip bg-amber-500/20 text-amber-300 text-xs font-bold px-2 py-0.5 rounded">INT 21H / AH=2CH</span>
+              </div>
+              <pre class="ltr-block bg-slate-900 p-2 rounded text-xs text-emerald-400 mb-2">MOV AH, 2C
+INT 21</pre>
+              <ul class="text-xs text-slate-300 space-y-1">
+                <li>• <strong>CH</strong> = الساعات (24 ساعة)</li>
+                <li>• <strong>CL</strong> = الدقائق | <strong>DH</strong> = الثواني</li>
+              </ul>
+            </div>
+
+            <div class="sub-card bg-black/50 border border-white/10 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">🖥️ 3. طباعة نص (Display String)</span>
+                <span class="ltr-chip bg-amber-500/20 text-amber-300 text-xs font-bold px-2 py-0.5 rounded">INT 21H / AH=09H</span>
+              </div>
+              <pre class="ltr-block bg-slate-900 p-2 rounded text-xs text-emerald-400 mb-2">MOV AH, 09
+MOV DX, 109 ; Offset in DX!
+INT 21</pre>
+              <ul class="text-xs text-slate-300 space-y-1">
+                <li>• عنوان بداية النص (Offset) بيتحط في <strong>DX</strong> (ميد 2025 س6).</li>
+                <li>• لازم النص ينتهي بعلامة <strong>'$'</strong>.</li>
+              </ul>
+            </div>
+
+            <div class="sub-card bg-rose-950/30 border border-rose-500/50 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm text-rose-300">⌨️ 4. قراءة حرف من الكيبورد ⭐</span>
+                <span class="ltr-chip bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded">INT 16H / AH=10H</span>
+              </div>
+              <pre class="ltr-block bg-slate-900 p-2 rounded text-xs text-emerald-400 mb-2">MOV AH, 10
+INT 16 ; Character in AL!</pre>
+              <p class="text-xs text-slate-200">
+                الحرف المقروء من الكيبورد بيتسلم في المسجل <strong><span class="ltr-chip text-emerald-400">AL</span></strong> (ميد 2025 س7 + شريحة 37 س17).
+              </p>
+            </div>
+
+            <div class="sub-card bg-black/50 border border-white/10 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">🛑 5. إنهاء البرنامج (Exit)</span>
+                <span class="ltr-chip bg-purple-500/20 text-purple-300 text-xs font-bold px-2 py-0.5 rounded">INT 21H / AH=4CH</span>
+              </div>
+              <pre class="ltr-block bg-slate-900 p-2 rounded text-xs text-emerald-400 mb-2">MOV AX, 4C00H
+INT 21H</pre>
+              <p class="text-xs text-slate-300">تنهي البرنامج وترجع لنظام التشغيل (بديلها المختصر <span class="ltr-chip text-amber-400">.EXIT</span>).</p>
+            </div>
+
+            <div class="sub-card bg-black/50 border border-emerald-500/40 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm text-emerald-400">📌 6. الـ PTR والـ BIOS Memory</span>
+                <span class="ltr-chip bg-emerald-500/20 text-emerald-300 text-xs font-bold px-2 py-0.5 rounded">BYTE / WORD PTR</span>
+              </div>
+              <pre class="ltr-block bg-slate-900 p-2 rounded text-[11px] text-amber-300 mb-1.5">MOV WORD PTR [120], 25 ; 25 00
+MOV BYTE PTR [122], 30 ; 30</pre>
+              <p class="text-[11px] text-slate-300">
+                عناوين BIOS: <span class="ltr-chip">D 40:00</span> (COM/LPT)، <span class="ltr-chip">D 40:10</span> (Equipment Word)، <span class="ltr-chip">D FE00:0</span> (Copyright)، <span class="ltr-chip">D FFFF:5</span> (Date).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lec 34 Sub-View B: Syntax & Directives -->
+      <div id="lec34-syntax" class="lec34-subview hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <h3 class="text-base sm:text-lg font-black text-emerald-400">🏷️ شروط تسمية الـ Identifiers والفرق بين Name و Label</h3>
+            <ul class="space-y-2 text-xs sm:text-sm text-slate-200">
+              <li>✔ <strong>الحروف والأرقام:</strong> من A-Z و 0-9 <strong>بشرط ميبدأش برقم أبداً!</strong> (<span class="ltr-chip text-rose-400">23AC</span> غلط).</li>
+              <li>✔ <strong>الرموز الخاصة المسموحة فقط (5 رموز):</strong> <span class="ltr-chip font-bold text-amber-400">_ &nbsp; ? &nbsp; $ &nbsp; . (مش أول حرف) &nbsp; @</span>. لذلك <span class="ltr-chip text-emerald-400">$50</span> صح، لكن <span class="ltr-chip text-rose-400">AT&amp;T</span> غلط عشان <span class="ltr-chip">&amp;</span>!</li>
+              <li>✔ <strong>الكلمات المحجوزة ممنوعة:</strong> مينفعش تسمي متغير باسم مسجل زي <span class="ltr-chip text-rose-400">EBX</span> أو أمر زي <span class="ltr-chip text-rose-400">MOV</span>.</li>
+              <li>💡 <strong>الفرق بين Name و Label (ميد 2025 س8):</strong> الـ <strong>Name</strong> عنوان متغير داتا بدون نقطتين (<span class="ltr-chip">COUNTER DB 0</span>)، أما الـ <strong>Label</strong> عنوان سطر كود ينتهي بنقطتين (<span class="ltr-chip text-amber-300">B30: ADD BL, 25</span> &larr; الـ Label هو <span class="ltr-chip font-bold text-emerald-400">B30</span>).</li>
+              <li>💡 <strong>تعريف دالة/إجراء (ميد 2025 س19):</strong> نستخدم الـ Directive <span class="ltr-chip font-bold text-amber-400">PROC</span> (وتنتهي بـ <span class="ltr-chip">ENDP</span>).</li>
+              <li>💡 <strong>تعريف ثابت رمزي (ميد 2025 س2):</strong> <span class="ltr-chip text-amber-400">Val EQU 1234H</span> ثم <span class="ltr-chip">MOV AX, Val</span> يجعل <span class="ltr-chip font-bold text-emerald-400">AX = 1234H</span>.</li>
+            </ul>
+          </div>
+
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <h3 class="text-base sm:text-lg font-black text-amber-400">📦 أنواع البيانات وأحجامها + الـ Memory Models</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-right border-collapse mb-3">
+                <thead>
+                  <tr class="bg-white/[0.05] text-slate-300 border-b border-white/10">
+                    <th class="p-2">الرمز</th>
+                    <th class="p-2">الاسم</th>
+                    <th class="p-2">الحجم</th>
+                    <th class="p-2">تريكة الامتحان</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10">
+                  <tr><td class="p-2 font-mono font-bold text-emerald-400">DB</td><td class="p-2">Define Byte</td><td class="p-2 font-bold">1 Byte</td><td class="p-2 text-rose-300">أخره 255! (280 يدي Error)</td></tr>
+                  <tr><td class="p-2 font-mono font-bold text-emerald-400">DW</td><td class="p-2">Define Word</td><td class="p-2 font-bold">2 Bytes</td><td class="p-2"><span class="ltr-chip">DW 10 DUP(?)</span> = 10 كلمات غير مهيأة (ميد 2025 س3)</td></tr>
+                  <tr><td class="p-2 font-mono font-bold text-emerald-400">DD</td><td class="p-2">Define Doubleword</td><td class="p-2 font-bold">4 Bytes</td><td class="p-2 text-amber-300">بيزود الـ Offset بـ 4</td></tr>
+                  <tr><td class="p-2 font-mono font-bold text-emerald-400">DQ</td><td class="p-2">Define Quadword</td><td class="p-2 font-bold">8 Bytes</td><td class="p-2">64-bit (قد حجم مسجل <span class="ltr-chip">RAX</span>)</td></tr>
+                  <tr><td class="p-2 font-mono font-bold text-amber-400">DT</td><td class="p-2 font-bold text-amber-300">Define Tenbytes</td><td class="p-2 font-bold">10 Bytes</td><td class="p-2 text-rose-300">Tenbytes مش Terabytes!</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sub-card p-3 rounded-xl bg-black/40 border border-white/10 text-xs space-y-1">
+              <div class="font-bold text-purple-400">📐 الـ Memory Models (ميد 2025 س13):</div>
+              <div>• <span class="ltr-chip font-bold text-emerald-400">.MODEL SMALL</span>: <strong>1 Code segment + 1 Data segment</strong> (الأشهر في الامتحان).</div>
+              <div>• <span class="ltr-chip font-bold text-amber-400">.MODEL MEDIUM</span>: <strong>More Code</strong> segments + 1 Data segment.</div>
+              <div>• <span class="ltr-chip font-bold text-sky-400">.MODEL COMPACT</span>: 1 Code segment + <strong>More Data</strong> segments.</div>
+              <div>• <span class="ltr-chip font-bold text-rose-400">.MODEL LARGE / HUGE</span>: أكثر من Code segment وأكثر من Data segment.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side by Side Program Templates -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="text-base sm:text-lg font-black mb-3">📄 هيكل البرنامج الكامل (Full Segment vs Simplified Directives)</h3>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="sub-card bg-black/50 border border-white/10 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sky-400 text-xs sm:text-sm">1. الطريقة التقليدية (Full Segment Directives)</span>
+                <button type="button" data-copytarget="codeFullSeg" class="copy-code-btn text-xs bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded text-slate-200">نسخ الكود</button>
+              </div>
+              <pre id="codeFullSeg" class="ltr-block bg-slate-950 p-3 rounded-lg text-xs text-slate-200 overflow-x-auto">PAGE 60, 132
+TITLE Hello World
+DataSeg SEGMENT PARA 'Data'
+    ; Variables here
+DataSeg ENDS
+CodeSegm SEGMENT PARA 'Code'
+Main PROC FAR
+    ASSUME DS:DataSeg, CS:CodeSegm
+    MOV AX, DataSeg
+    MOV DS, AX
+    MOV AX, 4C00H
+    INT 21H
+Main ENDP
+CodeSegm ENDS
+END Main</pre>
+            </div>
+
+            <div class="sub-card bg-black/50 border border-emerald-500/40 rounded-xl p-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-emerald-400 text-xs sm:text-sm">2. الطريقة المختصرة (Simplified Directives) ⭐</span>
+                <button type="button" data-copytarget="codeSimpSeg" class="copy-code-btn text-xs bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded text-slate-200">نسخ الكود</button>
+              </div>
+              <pre id="codeSimpSeg" class="ltr-block bg-slate-950 p-3 rounded-lg text-xs text-emerald-200 overflow-x-auto">PAGE 60, 132
+TITLE Hello World
+.MODEL SMALL
+.STACK 64
+.DATA
+    ; Variables here
+.CODE
+MAIN PROC FAR
+    MOV AX, @data
+    MOV DS, AX
+    MOV AX, 4C00H
+    INT 21H
+MAIN ENDP
+END MAIN</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lec 34 Sub-View C: Traps & Slide 35 Bug Hunt -->
+      <div id="lec34-traps" class="lec34-subview hidden space-y-6">
+        <div class="glass-panel bg-gradient-to-br from-rose-950/40 to-slate-900 border-2 border-rose-500/50 rounded-2xl p-5">
+          <h3 class="text-base sm:text-lg font-black text-rose-400 mb-3">🕵️‍♂️ سؤال "طلّع الأخطاء من الكود" (شريحة 35 - امتحان ميدتيرم سابق)</h3>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+            <div class="bg-slate-950 border border-rose-500/40 rounded-xl p-4 ltr-block text-xs space-y-1 text-slate-200">
+              <div>1  TITLE Assembly Mid-term exam 2017</div>
+              <div>2  .MODEL SMALL</div>
+              <div>3  .STACK 64</div>
+              <div>4  .DATA</div>
+              <div>5  DATA1 DB 25</div>
+              <div class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">6  DATA2 DB 280     &lt;-- Error 1 (&gt;255 for DB)</div>
+              <div>7  DATA3 DW ?</div>
+              <div>8  .CODE</div>
+              <div class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">9  MAIN PROC        &lt;-- Note: MAIN PROC FAR</div>
+              <div class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">10 MOV AX, data     &lt;-- Error 2 (Missing @data)</div>
+              <div>11 MOV DS, AX</div>
+              <div class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">12 MOV AX, DATA1    &lt;-- Error 3 (Size Mismatch 16b vs 8b)</div>
+              <div class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">13 ADD AX, DATA2    &lt;-- Error 4 (Size Mismatch 16b vs 8b)</div>
+              <div>14 MOV DATA3, AX</div>
+              <div class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">15 MOV FX, 4C00H    &lt;-- Error 5 (No FX register, use AX)</div>
+              <div>16 INT 21H</div>
+              <div>17 MAIN ENDP</div>
+              <div>18 END MAIN</div>
+            </div>
+
+            <div class="space-y-2.5 text-xs sm:text-sm">
+              <div class="sub-card bg-black/50 p-3 rounded-xl border-r-4 border-rose-500">
+                <span class="font-bold text-rose-400 block">1. السطر 6 (<span class="ltr-chip">DATA2 DB 280</span>) + السطر 12 و 13:</span>
+                الـ <span class="ltr-chip">DB</span> آخره 255، وكمان مينفعش ننقل <span class="ltr-chip">DB</span> جوه <span class="ltr-chip">AX (16-bit)</span>. الحل: نعرف <span class="ltr-chip text-emerald-400">DATA1 DW 25</span> و <span class="ltr-chip text-emerald-400">DATA2 DW 280</span>.
+              </div>
+              <div class="sub-card bg-black/50 p-3 rounded-xl border-r-4 border-rose-500">
+                <span class="font-bold text-rose-400 block">2. السطر 10 (<span class="ltr-chip">MOV AX, data</span>):</span>
+                نسي علامة <span class="ltr-chip">@</span>! الصح: <span class="ltr-chip text-emerald-400">MOV AX, @data</span>.
+              </div>
+              <div class="sub-card bg-black/50 p-3 rounded-xl border-r-4 border-rose-500">
+                <span class="font-bold text-rose-400 block">3. السطر 15 (<span class="ltr-chip">MOV FX, 4C00H</span>):</span>
+                مفيش مسجل اسمه <span class="ltr-chip">FX</span>! الصح: <span class="ltr-chip text-emerald-400">MOV AX, 4C00H</span>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
+            <h4 class="font-black text-amber-400">⚠️ فخ الرقم العشري ضد علامات التنصيص <span class="ltr-chip">' '</span></h4>
+            <p class="text-slate-300">• <span class="ltr-chip text-amber-300">X DB 82</span> ثم <span class="ltr-chip">MOV AL, X</span> &larr; الـ 82 عشري تتحول لـ Hex بالقسمة على 16: <span class="ltr-chip">82 / 16 = 5 R 2</span> أي <span class="ltr-chip font-bold text-emerald-400">52H</span>.</p>
+            <p class="text-slate-300">• <span class="ltr-chip text-amber-300">X DB '82'</span> ثم <span class="ltr-chip">MOV AL, X</span> &larr; بين علامات تنصيص يعني ASCII! المسجل <span class="ltr-chip">AL</span> بياخد أول حرف <span class="ltr-chip">'8'</span>، وكود الـ ASCII لأي رقم هو (<span class="ltr-chip">3</span> جنب الرقم) يعني <span class="ltr-chip font-bold text-rose-400">38H</span>!</p>
+          </div>
+
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
+            <h4 class="font-black text-sky-400">🧮 قوانين مدى الـ Segment وعنوان عنصر المصفوفة</h4>
+            <p class="text-slate-300">• <strong>مدى العناوين (Range):</strong> يبدأ من <span class="ltr-chip text-emerald-400">Seg &times; 10H</span> وينتهي عند <span class="ltr-chip text-emerald-400">(Seg &times; 10H) + FFFFH</span>.</p>
+            <p class="text-slate-300">• <strong>عنوان عنصر المصفوفة:</strong> <span class="ltr-chip text-amber-300">Base + (Index &times; Size_of_Type)</span>. مثلاً العنصر الخامس (<span class="ltr-chip">Index=4</span>) في مصفوفة Words (<span class="ltr-chip">Size=2</span>) هو <span class="ltr-chip font-bold text-emerald-400">[W + 2*4]</span>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         MODULE 4: INTERACTIVE ALL-IN-ONE LAB (CALCULATORS & SIMULATORS)
+         ===================================================================== -->
+    <section id="mod-labs" class="module-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl border border-emerald-500/30 bg-gradient-to-l from-emerald-500/10 via-white/[0.02] to-transparent p-5">
+        <span class="ltr-chip text-xs font-bold text-emerald-400 uppercase tracking-widest">MODULE 04 // INTERACTIVE SOLVER LAB</span>
+        <h2 class="text-xl sm:text-2xl font-extrabold mt-1">مختبر الحاسبات والمحاكيات التفاعلية (حل أي مسألة بالخطوات)</h2>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">يجمع حاسبة الميموري والـ <span class="ltr-chip">Buses</span>، حاسبة <span class="ltr-chip">Segment:Offset &amp; Little-Endian</span>، محلل بتات الـ <span class="ltr-chip">Flag Register</span>، ومحاكي الـ <span class="ltr-chip">Stack PUSH/POP</span>.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Lab 1: Memory & Buses Calculator -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <h3 class="text-base sm:text-lg font-extrabold text-amber-400 border-b border-white/10 pb-2">
+            1. حاسبة مسائل الـ <span class="ltr-chip">Memory, Address Bus &amp; Data Bus</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+            <div>
+              <label for="calcMemSize" class="block text-slate-300 mb-1 font-bold">Memory Size:</label>
+              <select id="calcMemSize" class="w-full rounded-xl bg-slate-900 border border-white/15 px-3 py-2 text-white font-mono">
+                <option value="16">64 KB (2^16 B)</option>
+                <option value="18">256 KB (2^18 B)</option>
+                <option value="19">512 KB (2^19 B)</option>
+                <option value="20" selected>1 MB (2^20 B) [8086]</option>
+                <option value="21">2 MB (2^21 B)</option>
+                <option value="22">4 MB (2^22 B)</option>
+                <option value="24">16 MB (2^24 B)</option>
+                <option value="30">1 GB (2^30 B)</option>
+              </select>
+            </div>
+            <div>
+              <label for="calcWordSize" class="block text-slate-300 mb-1 font-bold">Word Size:</label>
+              <select id="calcWordSize" class="w-full rounded-xl bg-slate-900 border border-white/15 px-3 py-2 text-white font-mono">
+                <option value="3" selected>1 Byte (8 bits) [8086]</option>
+                <option value="4">2 Bytes (16 bits)</option>
+                <option value="5">4 Bytes (32 bits)</option>
+                <option value="6">8 Bytes (64 bits)</option>
+              </select>
+            </div>
+            <div>
+              <label for="calcDataBus" class="block text-slate-300 mb-1 font-bold">Data Bus Size:</label>
+              <select id="calcDataBus" class="w-full rounded-xl bg-slate-900 border border-white/15 px-3 py-2 text-white font-mono">
+                <option value="8">8-bit data bus</option>
+                <option value="16" selected>16-bit data bus [8086]</option>
+                <option value="32">32-bit data bus</option>
+                <option value="64">64-bit data bus</option>
+              </select>
+            </div>
+          </div>
+          <div id="calcMemOutput" class="ltr-block rounded-xl bg-slate-950 border border-white/10 p-4 space-y-1.5 text-xs sm:text-sm text-slate-200"></div>
+        </div>
+
+        <!-- Lab 2: Segment:Offset & Little-Endian Calculator -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <h3 class="text-base sm:text-lg font-extrabold text-emerald-400">
+              2. حاسبة <span class="ltr-chip">Segment : Offset</span> و <span class="ltr-chip">Little-Endian</span>
+            </h3>
+            <div class="flex gap-1.5">
+              <button type="button" id="presetMid2025Q4" class="text-[11px] px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">ميد 2025 س4</button>
+              <button type="button" id="presetMid2025Q18" class="text-[11px] px-2 py-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">ميد 2025 س18</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+            <div>
+              <label for="inputSegReg" class="block text-slate-300 mb-1 font-bold">Segment Reg (4 Hex):</label>
+              <input id="inputSegReg" type="text" maxlength="4" value="04A2" class="ltr-block w-full rounded-xl bg-slate-900 border border-white/15 px-3 py-2 text-amber-300 font-bold uppercase" />
+            </div>
+            <div>
+              <label for="inputOffset" class="block text-slate-300 mb-1 font-bold">Offset (4 Hex):</label>
+              <input id="inputOffset" type="text" maxlength="4" value="2115" class="ltr-block w-full rounded-xl bg-slate-900 border border-white/15 px-3 py-2 text-sky-300 font-bold uppercase" />
+            </div>
+            <div>
+              <label for="inputHexVal" class="block text-slate-300 mb-1 font-bold">16-bit Value to Store:</label>
+              <input id="inputHexVal" type="text" maxlength="4" value="2529" class="ltr-block w-full rounded-xl bg-slate-900 border border-white/15 px-3 py-2 text-emerald-300 font-bold uppercase" />
+            </div>
+          </div>
+          <div id="calcSegOutput" class="ltr-block rounded-xl bg-slate-950 border border-white/10 p-4 space-y-2.5 text-xs sm:text-sm text-slate-200"></div>
+        </div>
+
+        <!-- Lab 3: Flag Register Interactive Bit Decoder -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <h3 class="text-base sm:text-lg font-extrabold text-rose-400">3. محلل <span class="ltr-chip">Flag Register (16-Bit Decoder)</span></h3>
+            <button type="button" id="presetFlag0F19" class="text-xs px-2.5 py-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">مثال السلايد (0F19H)</button>
+          </div>
+          <div class="flex gap-2">
+            <input id="flagHexInput" type="text" maxlength="4" value="0F19" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-white/15 ltr-block font-bold text-rose-400" />
+            <button type="button" id="decodeFlagBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm transition">حلل الـ Flags</button>
+          </div>
+          <p class="text-xs text-slate-400">اضغط على أي خانة Bit لتبديلها بين <span class="ltr-chip">0</span> و <span class="ltr-chip">1</span>:</p>
+          <div id="flagBitsGrid" class="grid grid-cols-8 gap-1.5 ltr-block text-center"></div>
+          <div id="flagStatusSummary" class="p-3 rounded-xl bg-slate-950 text-xs ltr-block text-slate-200 border border-white/10 space-y-1"></div>
+        </div>
+
+        <!-- Lab 4: Stack PUSH/POP Visualizer -->
+        <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <h3 class="text-base sm:text-lg font-extrabold text-purple-400">4. محاكي الـ <span class="ltr-chip">Stack Frame (PUSH &amp; POP)</span></h3>
+            <button type="button" id="resetStackBtn" class="text-xs px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">إعادة ضبط (SP=36)</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <label for="stackAxInput" class="block font-bold mb-1 text-slate-300">AX (Hex):</label>
+              <input id="stackAxInput" type="text" maxlength="4" value="026B" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-white/15 ltr-block font-bold text-sky-400" />
+            </div>
+            <div>
+              <label for="stackBxInput" class="block font-bold mb-1 text-slate-300">BX (Hex):</label>
+              <input id="stackBxInput" type="text" maxlength="4" value="04E3" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-white/15 ltr-block font-bold text-purple-400" />
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" id="pushAxBtn" class="py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-mono font-bold text-xs">PUSH AX</button>
+            <button type="button" id="pushBxBtn" class="py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs">PUSH BX</button>
+            <button type="button" id="popAxBtn" class="py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs">POP AX</button>
+            <button type="button" id="popBxBtn" class="py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold text-xs">POP BX</button>
+          </div>
+          <div id="stackActionLog" class="p-2.5 rounded-lg bg-slate-950 text-emerald-400 ltr-block text-xs border border-white/10"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="bg-slate-950 p-3 rounded-xl border border-white/10">
+              <div class="text-[11px] text-slate-400 ltr-block mb-1">Word View (Slide Format):</div>
+              <table class="w-full text-xs ltr-block">
+                <thead><tr class="text-slate-400 border-b border-white/10"><th class="py-1 text-left">Offset</th><th class="py-1 text-left">Frame</th><th class="py-1 text-left">SP</th></tr></thead>
+                <tbody id="stackWordTableBody"></tbody>
+              </table>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-white/10">
+              <div class="text-[11px] text-slate-400 ltr-block mb-1.5">Byte Strip (Little Endian):</div>
+              <div id="stackByteStrip" class="grid grid-cols-3 gap-1.5 text-center ltr-block"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         MODULE 5: MIDTERM 2025 SOLVED + MASTER 67-QUESTION BANK & SPEEDRUN
+         ===================================================================== -->
+    <section id="mod-mid2025" class="module-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl border border-rose-500/30 bg-gradient-to-l from-rose-500/15 via-amber-500/5 to-transparent p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <span class="ltr-chip text-xs font-bold text-rose-400 uppercase tracking-widest">MODULE 05 // OFFICIAL MIDTERM 2025 + FULL 67-QUESTION BANK</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold mt-1">امتحان ميدتيرم 2025 الرسمي محلول بالكامل + بنك الـ 67 سؤال</h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">فلتر الأسئلة حسب الامتحان أو المحاضرة، أو افتح وضع البصمجة السريعة لإظهار كل الإجابات والشرح، أو اختبر نفسك بالتايمر.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs sm:text-sm font-bold text-white">
+            النتيجة: <span id="masterScoreText" class="ltr-chip text-emerald-400">0 / 67</span>
+          </div>
+          <button type="button" id="studyModeShowAllBtn" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+            👁️ إظهار كل الإجابات (وضع البصمجة)
+          </button>
+          <button type="button" id="studyModeHideAllBtn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-bold text-xs border border-white/10 transition">
+            🎯 إخفاء الإجابات (اختبر نفسك)
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" data-qfilter="mid2025" class="qfilter-btn subtab-btn active px-3.5 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-extrabold transition">
+          🔥 امتحان ميدتيرم 2025 (20 سؤال)
+        </button>
+        <button type="button" data-qfilter="all" class="qfilter-btn subtab-btn px-3.5 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-bold transition">
+          الكل شامل (67 سؤال)
+        </button>
+        <button type="button" data-qfilter="lec1" class="qfilter-btn subtab-btn px-3.5 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-bold transition">
+          أسئلة محاضرة 1 (12 سؤال)
+        </button>
+        <button type="button" data-qfilter="lec2" class="qfilter-btn subtab-btn px-3.5 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-bold transition">
+          أسئلة محاضرة 2 (15 سؤال)
+        </button>
+        <button type="button" data-qfilter="lec34" class="qfilter-btn subtab-btn px-3.5 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-bold transition">
+          أسئلة محاضرة 3 و 4 (20 سؤال)
+        </button>
+      </div>
+
+      <!-- Master Questions Grid -->
+      <div id="masterQuestionsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SPEEDRUN FULLSCREEN COCKPIT MODAL
+       ===================================================================== -->
+  <div id="speedrunModal" class="fixed inset-0 z-50 hidden bg-[#07080A] text-slate-100 flex flex-col justify-between p-4 sm:p-6 overflow-y-auto">
+    <!-- Top Bar -->
+    <div class="max-w-4xl w-full mx-auto flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 rounded-lg bg-amber-500 text-black font-mono font-extrabold text-xs">SPEEDRUN COCKPIT</span>
+        <select id="speedrunDeckSelect" class="bg-slate-900 border border-white/15 rounded-lg px-2.5 py-1 text-xs font-bold text-white">
+          <option value="mid2025">ميدتيرم 2025 (20 سؤال)</option>
+          <option value="all" selected>البنك الشامل (67 سؤال)</option>
+          <option value="lec1">المحاضرة 1 (12 سؤال)</option>
+          <option value="lec2">المحاضرة 2 (15 سؤال)</option>
+          <option value="lec34">المحاضرة 3 &amp; 4 (20 سؤال)</option>
+        </select>
+      </div>
+
+      <!-- Configurable Timer Controls -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-xs text-slate-400 ml-1">التايمر:</span>
+        <button type="button" data-timer="15" class="sr-timer-btn px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono">15s</button>
+        <button type="button" data-timer="30" class="sr-timer-btn px-2 py-1 rounded bg-amber-500 text-black font-bold text-xs font-mono">30s</button>
+        <button type="button" data-timer="45" class="sr-timer-btn px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono">45s</button>
+        <button type="button" data-timer="60" class="sr-timer-btn px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono">60s</button>
+        <button type="button" data-timer="0" class="sr-timer-btn px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono">OFF</button>
+        <input id="srCustomTimerInput" type="number" min="5" max="300" placeholder="ثواني" class="w-16 px-2 py-1 rounded bg-slate-900 border border-white/15 text-xs font-mono text-center text-amber-300" />
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div id="srCountdownBadge" class="ltr-chip px-3 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-extrabold text-sm">
+          00:30
+        </div>
+        <button type="button" id="closeSpeedrunBtn" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold">
+          إغلاق (Esc)
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Question Cockpit -->
+    <div class="max-w-4xl w-full mx-auto my-auto py-6 space-y-5">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span id="srProgressText" class="ltr-chip font-bold text-amber-400">Question 1 / 67</span>
+        <span id="srStatsText" class="ltr-chip">Correct: 0 | Re-queued: 0</span>
+      </div>
+
+      <div id="srQuestionCard" class="p-6 rounded-2xl bg-white/[0.03] border border-white/10 space-y-5 shadow-2xl">
+        <div id="srQuestionBadge" class="text-xs font-bold text-amber-400"></div>
+        <div id="srQuestionText" class="ltr-block text-base sm:text-lg font-bold text-white leading-relaxed"></div>
+        <div id="srOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        <div id="srExplanationBox" class="hidden p-4 rounded-xl border text-xs sm:text-sm space-y-1"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="max-w-4xl w-full mx-auto flex items-center justify-between border-t border-white/10 pt-4 text-xs">
+      <div class="text-slate-400">اختصارات الكيبورد: <span class="ltr-chip text-slate-200">1, 2, 3, 4</span> للاختيار • <span class="ltr-chip text-slate-200">&larr; / &rarr;</span> للتنقل • <span class="ltr-chip text-slate-200">Esc</span> للخروج</div>
+      <div class="flex gap-2">
+        <button type="button" id="srPrevBtn" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 font-bold">السابق</button>
+        <button type="button" id="srNextBtn" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold">التالي</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copy Toast -->
+  <div id="copyToast" class="fixed bottom-5 left-5 z-50 bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+    ✔ تم نسخ الكود بنجاح!
+  </div>
+
+  <footer class="max-w-7xl mx-auto px-4 py-8 text-center text-xs text-slate-500 border-t border-white/10 mt-12">
+    VECTR // CS214P Assembly Language Master Hub — Lectures 1, 2, 3, 4 + Solved Midterm 2025 • Crafted for Hasan Atwah (Bimo)
+  </footer>
+
+  <script>
+    // =========================================================================
+    // 1. AUTO-HIDING NAVBAR ON SCROLL
+    // =========================================================================
+    let lastScrollY = window.scrollY;
+    const mainHeader = document.getElementById('mainHeader');
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      if (currentY > 120 && currentY > lastScrollY + 8) {
+        mainHeader.classList.add('nav-hidden');
+      } else if (currentY < lastScrollY - 8 || currentY <= 80) {
+        mainHeader.classList.remove('nav-hidden');
+      }
+      lastScrollY = currentY;
+    }, { passive: true });
+
+    // =========================================================================
+    // 2. MODULE & SUB-TAB NAVIGATION
+    // =========================================================================
+    let currentModule = 'lec1';
+    const moduleButtons = document.querySelectorAll('.module-btn');
+    const moduleSections = document.querySelectorAll('.module-section');
+
+    function switchModule(modId) {
+      currentModule = modId;
+      moduleSections.forEach(sec => {
+        if (sec.id === 'mod-' + modId) sec.classList.remove('hidden');
+        else sec.classList.add('hidden');
+      });
+      moduleButtons.forEach(btn => {
+        if (btn.getAttribute('data-module') === modId) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    moduleButtons.forEach(btn => {
+      btn.addEventListener('click', () => switchModule(btn.getAttribute('data-module')));
+    });
+
+    function setupSubTabs(btnSelector, viewSelector) {
+      const btns = document.querySelectorAll(btnSelector);
+      const views = document.querySelectorAll(viewSelector);
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-subtarget');
+          views.forEach(v => {
+            if (v.id === target) v.classList.remove('hidden');
+            else v.classList.add('hidden');
+          });
+          btns.forEach(b => b.classList.remove('active'));
+          btn.class.add ? btn.classList.add('active') : null;
+          btn.classList.add('active');
+        });
+      });
+    }
+
+    setupSubTabs('.lec1-subbtn', '.lec1-subview');
+    setupSubTabs('.lec2-subbtn', '.lec2-subview');
+    setupSubTabs('.lec34-subbtn', '.lec34-subview');
+
+    document.querySelectorAll('.jump-module-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchModule(btn.getAttribute('data-JumpModule')));
+    });
+
+    document.querySelectorAll('.jump-quiz-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filterCat = btn.getAttribute('data-JumpQuiz');
+        switchModule('mid2025');
+        setQuestionFilter(filterCat);
+      });
+    });
+
+    // =========================================================================
+    // 3. DARK / LIGHT THEME TOGGLE
+    // =========================================================================
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeLabel = document.getElementById('themeLabel');
+    themeToggleBtn.addEventListener('click', () => {
+      const htmlEl = document.documentElement;
+      htmlEl.classList.toggle('dark');
+      const isDark = htmlEl.classList.contains('dark');
+      themeLabel.textContent = isDark ? 'LIGHT' : 'DARK';
+      mainHeader.style.backgroundColor = isDark ? 'rgba(5, 6, 8, 0.9)' : 'rgba(248, 250, 252, 0.92)';
+    });
+
+    // =========================================================================
+    // 4. COPY CODE HELPER
+    // =========================================================================
+    document.querySelectorAll('.copy-code-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-copytarget');
+        const el = document.getElementById(targetId);
+        if (!el) return;
+        const textarea = document.createElement('textarea');
+        textarea.value = el.innerText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        const toast = document.getElementById('copyToast');
+        toast.classList.remove('opacity-0');
+        setTimeout(() => toast.classList.add('opacity-0'), 2000);
+      });
+    });
+
+    // =========================================================================
+    // 5. GLOBAL SEARCH ACROSS ALL MODULES
+    // =========================================================================
+    const globalSearchInput = document.getElementById('globalSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchStatusBanner = document.getElementById('searchStatusBanner');
+    const exitSearchModeBtn = document.getElementById('exitSearchModeBtn');
+
+    function exitSearchMode() {
+      globalSearchInput.value = '';
+      clearSearchBtn.classList.add('hidden');
+      searchStatusBanner.classList.add('hidden');
+      document.querySelectorAll('.lec1-subview, .lec2-subview, .lec34-subview').forEach(v => v.classList.add('hidden'));
+      document.getElementById('lec1-formulas').classList.remove('hidden');
+      document.getElementById('lec2-patterns').classList.remove('hidden');
+      document.getElementById('lec34-debug').classList.remove('hidden');
+      switchModule(currentModule);
+      renderMasterQuestions();
+    }
+
+    globalSearchInput.addEventListener('input', () => {
+      const term = globalSearchInput.value.trim().toLowerCase();
+      if (!term) {
+        exitSearchMode();
+        return;
+      }
+      clearSearchBtn.classList.remove('hidden');
+      searchStatusBanner.classList.remove('hidden');
+      moduleSections.forEach(sec => sec.classList.remove('hidden'));
+      document.querySelectorAll('.lec1-subview, .lec2-subview, .lec34-subview').forEach(v => v.classList.remove('hidden'));
+      renderMasterQuestions(term);
+    });
+
+    clearSearchBtn.addEventListener('click', exitSearchMode);
+    exitSearchModeBtn.addEventListener('click', exitSearchMode);
+
+    // =========================================================================
+    // 6. INTERACTIVE LAB CALCULATORS (MEMORY, SEGMENT:OFFSET, FLAGS, STACK)
+    // =========================================================================
+    const calcMemSize = document.getElementById('calcMemSize');
+    const calcWordSize = document.getElementById('calcWordSize');
+    const calcDataBus = document.getElementById('calcDataBus');
+    const calcMemOutput = document.getElementById('calcMemOutput');
+
+    function updateMemoryCalc() {
+      const memBytesPow = parseInt(calcMemSize.value, 10);
+      const wordBitsPow = parseInt(calcWordSize.value, 10);
+      const dataBusBits = parseInt(calcDataBus.value, 10);
+
+      const memBitsPow = memBytesPow + 3;
+      const wordsPow = memBitsPow - wordBitsPow;
+      const wordBits = Math.pow(2, wordBitsPow);
+      const fetchedWords = dataBusBits / wordBits;
+      const fetchedText = fetchedWords >= 1
+        ? `${fetchedWords} word(s) at a time`
+        : `${fetchedWords} word (requires ${1 / fetchedWords} cycles per word)`;
+
+      calcMemOutput.innerHTML = `
+        <div class="text-slate-400 text-xs uppercase">Step-by-Step Solution:</div>
+        <div>1) Memory Size in bits = 2^${memBytesPow} Bytes &times; 2^3 bits = <span class="text-amber-300 font-bold">2^${memBitsPow} bits</span></div>
+        <div>2) Word Size in bits = <span class="text-amber-300 font-bold">${wordBits} bits = 2^${wordBitsPow} bits</span></div>
+        <div>3) Memory Size in words = 2^${memBitsPow} / 2^${wordBitsPow} = <span class="text-emerald-400 font-bold">2^${wordsPow} words</span></div>
+        <div>4) # bits for Address Bus = <span class="text-rose-400 font-extrabold">${wordsPow} bits</span></div>
+        <div>5) Words fetched at a time = ${dataBusBits} bits / ${wordBits} bits = <span class="text-sky-400 font-extrabold">${fetchedText}</span></div>
+      `;
+    }
+
+    calcMemSize.addEventListener('change', updateMemoryCalc);
+    calcWordSize.addEventListener('change', updateMemoryCalc);
+    calcDataBus.addEventListener('change', updateMemoryCalc);
+    updateMemoryCalc();
+
+    // Lab 2: Segment:Offset & Little-Endian
+    const inputSegReg = document.getElementById('inputSegReg');
+    const inputOffset = document.getElementById('inputOffset');
+    const inputHexVal = document.getElementById('inputHexVal');
+    const calcSegOutput = document.getElementById('calcSegOutput');
+
+    function sanitizeHex(str, padLen) {
+      const cleaned = (str || '').replace(/[^0-9a-fA-F]/g, '').toUpperCase();
+      return cleaned.padStart(padLen, '0').slice(-padLen);
+    }
+
+    function updateSegAndEndianCalc() {
+      const seg4 = sanitizeHex(inputSegReg.value, 4);
+      const segStart5 = seg4 + '0';
+      const off4 = sanitizeHex(inputOffset.value, 4);
+      const val4 = sanitizeHex(inputHexVal.value, 4);
+
+      const segNum = parseInt(segStart5, 16);
+      const offNum = parseInt(off4, 16);
+      const absNum = (segNum + offNum) & 0xFFFFF;
+      const absNextNum = (absNum + 1) & 0xFFFFF;
+      const rangeEndNum = (segNum + 0xFFFF) & 0xFFFFF;
+
+      const absHex = absNum.toString(16).toUpperCase().padStart(5, '0');
+      const absNextHex = absNextNum.toString(16).toUpperCase().padStart(5, '0');
+      const rangeEndHex = rangeEndNum.toString(16).toUpperCase().padStart(5, '0');
+
+      const highByte = val4.slice(0, 2);
+      const lowByte = val4.slice(2, 4);
+
+      calcSegOutput.innerHTML = `
+        <div>
+          <div class="text-slate-400 text-xs">A) Physical / Actual Address &amp; Segment Range:</div>
+          <div class="font-bold text-white mt-0.5">
+            (${seg4}H &times; 10H) + ${off4}H = <span class="text-amber-300">${segStart5}H</span> + <span class="text-sky-300">${off4}H</span> = <span class="text-emerald-400 font-extrabold text-base">${absHex}H</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-0.5">Segment Range: <span class="text-slate-200">${segStart5}H &rarr; ${rangeEndHex}H</span></div>
+        </div>
+        <div class="border-t border-white/10 pt-2">
+          <div class="text-slate-400 text-xs mb-1">B) Storing ${val4}H in Memory (Little-Endian):</div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-white/[0.04] p-2 rounded border border-white/10">
+              <div class="text-slate-400 mb-1">Register (Normal Order):</div>
+              <div class="flex gap-1 text-center font-bold">
+                <div class="flex-1 bg-amber-500/20 text-amber-300 py-1 rounded">${highByte} (High)</div>
+                <div class="flex-1 bg-emerald-500/20 text-emerald-300 py-1 rounded">${lowByte} (Low)</div>
+              </div>
+            </div>
+            <div class="bg-white/[0.04] p-2 rounded border border-white/10 space-y-1">
+              <div class="flex justify-between px-2 py-0.5 bg-sky-500/15 rounded">
+                <span class="text-rose-300 font-bold">${absNextHex}H (Higher)</span>
+                <span class="text-amber-300 font-extrabold">${highByte}</span>
+              </div>
+              <div class="flex justify-between px-2 py-0.5 bg-sky-500/15 rounded">
+                <span class="text-rose-300 font-bold">${absHex}H (Lower)</span>
+                <span class="text-emerald-300 font-extrabold">${lowByte}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    inputSegReg.addEventListener('input', updateSegAndEndianCalc);
+    inputOffset.addEventListener('input', updateSegAndEndianCalc);
+    inputHexVal.addEventListener('input', updateSegAndEndianCalc);
+    document.getElementById('presetMid2025Q4').addEventListener('click', () => {
+      inputSegReg.value = '1111';
+      inputOffset.value = '1451';
+      inputHexVal.value = '2529';
+      updateSegAndEndianCalc();
+    });
+    document.getElementById('presetMid2025Q18').addEventListener('click', () => {
+      inputSegReg.value = '04A2';
+      inputOffset.value = '2115';
+      inputHexVal.value = '2529';
+      updateSegAndEndianCalc();
+    });
+    updateSegAndEndianCalc();
+
+    // Lab 3: Flag Register Decoder
+    const flagMap = {
+      11: 'OF', 10: 'DF', 9: 'IF', 8: 'TF',
+      7: 'SF', 6: 'ZF', 4: 'AF', 2: 'PF', 0: 'CF'
+    };
+    let currentFlagVal = 0x0F19;
+
+    function renderFlags() {
+      const hexStr = currentFlagVal.toString(16).toUpperCase().padStart(4, '0');
+      document.getElementById('flagHexInput').value = hexStr;
+      const grid = document.getElementById('flagBitsGrid');
+      grid.innerHTML = '';
+
+      const activeFlags = [];
+      const inactiveFlags = [];
+
+      for (let bit = 15; bit >= 0; bit--) {
+        const bitVal = (currentFlagVal >> bit) & 1;
+        const name = flagMap[bit] || '-';
+        const isNamed = Boolean(flagMap[bit]);
+
+        if (isNamed) {
+          if (bitVal === 1) activeFlags.push(`${name}(Bit ${bit})=1`);
+          else inactiveFlags.push(`${name}(Bit ${bit})=0`);
+        }
+
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = `p-1.5 rounded-lg border text-xs flex flex-col items-center justify-center transition ${
+          isNamed
+            ? (bitVal ? 'bg-rose-600/20 border-rose-500 text-rose-300 font-bold' : 'bg-slate-900 border-slate-700 text-slate-300')
+            : 'bg-slate-950 border-slate-800 text-slate-600'
+        }`;
+        cell.innerHTML = `
+          <span class="text-[10px] text-slate-400">${bit}</span>
+          <span class="text-sm font-extrabold ${bitVal ? 'text-amber-400' : 'text-slate-400'}">${bitVal}</span>
+          <span class="text-[10px] ${isNamed ? 'text-rose-400 font-bold' : 'text-slate-600'}">${name}</span>
+        `;
+        cell.addEventListener('click', () => {
+          currentFlagVal ^= (1 << bit);
+          renderFlags();
+        });
+        grid.appendChild(cell);
+      }
+
+      document.getElementById('flagStatusSummary').innerHTML = `
+        <div><strong class="text-emerald-400">Binary:</strong> ${currentFlagVal.toString(2).padStart(16, '0').replace(/(.{4})/g, '$1 ').trim()}</div>
+        <div><strong class="text-amber-400">SET Flags (= 1):</strong> ${activeFlags.length ? activeFlags.join(' , ') : 'None'}</div>
+        <div><strong class="text-slate-400">CLEAR Flags (= 0):</strong> ${inactiveFlags.length ? inactiveFlags.join(' , ') : 'None'}</div>
+      `;
+    }
+
+    document.getElementById('decodeFlagBtn').addEventListener('click', () => {
+      const cleaned = document.getElementById('flagHexInput').value.trim().toUpperCase().replace(/[^0-9A-F]/g, '') || '0';
+      currentFlagVal = parseInt(cleaned, 16) & 0xFFFF;
+      renderFlags();
+    });
+    document.getElementById('presetFlag0F19').addEventListener('click', () => {
+      currentFlagVal = 0x0F19;
+      renderFlags();
+    });
+    renderFlags();
+
+    // Lab 4: Stack PUSH / POP
+    let sp = 0x36;
+    let stackBytes = {};
+
+    function resetStack() {
+      sp = 0x36;
+      stackBytes = {
+        0x2E: '00', 0x2F: '00',
+        0x30: '00', 0x31: '00',
+        0x32: '00', 0x33: '00',
+        0x34: '00', 0x35: '00'
+      };
+      document.getElementById('stackAxInput').value = '026B';
+      document.getElementById('stackBxInput').value = '04E3';
+      document.getElementById('stackActionLog').textContent = 'Initial state (Slide 28): AX=026B, BX=04E3, SP=36H.';
+      renderStack();
+    }
+
+    function renderStack() {
+      const tbody = document.getElementById('stackWordTableBody');
+      tbody.innerHTML = '';
+      [0x34, 0x32, 0x30, 0x2E].forEach(off => {
+        const low = stackBytes[off] || '00';
+        const high = stackBytes[off + 1] || '00';
+        const isSp = (sp === off);
+        const tr = document.createElement('tr');
+        tr.className = `border-b border-white/5 ${isSp ? 'bg-amber-500/20 font-bold' : ''}`;
+        tr.innerHTML = `
+          <td class="py-1 text-slate-300">${off.toString(16).toUpperCase()}</td>
+          <td class="py-1 text-rose-400 font-bold">${low}${high}</td>
+          <td class="py-1 text-amber-400">${isSp ? '&larr; SP=' + sp.toString(16).toUpperCase() : ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const strip = document.getElementById('stackByteStrip');
+      strip.innerHTML = '';
+      for (let addr = 0x30; addr <= 0x35; addr++) {
+        const val = stackBytes[addr] || '00';
+        const isCurrentSp = (addr === sp || addr === sp + 1);
+        const box = document.createElement('div');
+        box.className = `p-1.5 rounded border text-xs ${isCurrentSp ? 'bg-amber-500/20 border-amber-500' : 'bg-slate-900 border-slate-800 text-slate-300'}`;
+        box.innerHTML = `
+          <div class="text-[10px] text-slate-400">${addr.toString(16).toUpperCase()}</div>
+          <div class="font-extrabold text-amber-300">${val}</div>
+        `;
+        strip.appendChild(box);
+      }
+    }
+
+    function pushReg(regName, inputId) {
+      if (sp <= 0x2E) {
+        document.getElementById('stackActionLog').textContent = 'Display limit reached (SP=2E)! Click POP or Reset.';
+        return;
+      }
+      const raw = sanitizeHex(document.getElementById(inputId).value, 4);
+      document.getElementById(inputId).value = raw;
+      const high = raw.slice(0, 2);
+      const low = raw.slice(2, 4);
+      sp -= 2;
+      stackBytes[sp] = low;
+      stackBytes[sp + 1] = high;
+      document.getElementById('stackActionLog').textContent = `PUSH ${regName} (${raw}): SP = SP - 2 = ${sp.toString(16).toUpperCase()}H. [${sp.toString(16).toUpperCase()}]=${low}, [${(sp+1).toString(16).toUpperCase()}]=${high}.`;
+      renderStack();
+    }
+
+    function popReg(regName, inputId) {
+      if (sp >= 0x36) {
+        document.getElementById('stackActionLog').textContent = 'Stack is at top (SP=36)! PUSH a register first.';
+        return;
+      }
+      const low = stackBytes[sp] || '00';
+      const high = stackBytes[sp + 1] || '00';
+      document.getElementById(inputId).value = high + low;
+      const oldSp = sp.toString(16).toUpperCase();
+      sp += 2;
+      document.getElementById('stackActionLog').textContent = `POP ${regName}: Read ${high}${low} from [${oldSp}H], then SP = SP + 2 = ${sp.toString(16).toUpperCase()}H.`;
+      renderStack();
+    }
+
+    document.getElementById('pushAxBtn').addEventListener('click', () => pushReg('AX', 'stackAxInput'));
+    document.getElementById('pushBxBtn').addEventListener('click', () => pushReg('BX', 'stackBxInput'));
+    document.getElementById('popAxBtn').addEventListener('click', () => popReg('AX', 'stackAxInput'));
+    document.getElementById('popBxBtn').addEventListener('click', () => popReg('BX', 'stackBxInput'));
+    document.getElementById('resetStackBtn').addEventListener('click', resetStack);
+    resetStack();
+
+    // =========================================================================
+    // 7. MASTER 67-QUESTION BANK (MID 2025 + LEC 1 + LEC 2 + LEC 3&4)
+    // =========================================================================
+    const allQuestions = [
+      // --- OFFICIAL MIDTERM 2025 (20 QUESTIONS) ---
+      {
+        id: 'm25-1', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 1',
+        q: '1) A bit ...................... in EFLAGS permits the single-step mode.',
+        options: ['TF', 'PF', 'AF', 'CF'],
+        correct: 0,
+        exp: 'الـ TF (Trap Flag - Bit 8) هو المسؤول عن تشغيل وضع الخطوة بخطوة (Single-step mode) في الـ Debugging.'
+      },
+      {
+        id: 'm25-2', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 2',
+        q: '2) Val EQU 1234H — MOV AX, Val : what is the value of AX ?',
+        options: ['34H', '1234H', '12H', '3412H'],
+        correct: 1,
+        exp: 'الـ EQU بيعرف ثابت رمزي بقيمة 1234H. ولما بننقل القيمة لـ Register (زي AX) بتتخزن معدولة زي ما هي 1234H (عكس البايتات Little-Endian بيحصل بس لما نخزن في الـ Memory!).'
+      },
+      {
+        id: 'm25-3', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 3',
+        q: '3) To define ten words with uninitiated values, the correct syntax will be ........',
+        options: ['DW 10 DUP(5)', 'DW 10 DUP(?)', 'DB 10 DUP(0)', 'DB 10 DUP(?)'],
+        correct: 1,
+        exp: 'كلمة Words يعني DW (Define Word)، وعشر عناصر يعني 10 DUP، وبدون قيمة ابتدائية (uninitiated) بنحط علامة استفهام (?) فتكون DW 10 DUP(?).'
+      },
+      {
+        id: 'm25-4', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 4',
+        q: '4) MOV CX, [BX], if CS = 1234H, DS = 1111H, BX = 1451H, the address of the data item that will be moved into CX is .......',
+        options: ['12561H', '11111H', '14511H', '13791H'],
+        correct: 0,
+        exp: 'وجود [BX] يعني Indirect Addressing جوه الـ Data Segment (DS) مش الـ CS! إذن العنوان الفعلي = (DS × 10H) + BX = 11110H + 1451H = 12561H.'
+      },
+      {
+        id: 'm25-5', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 5',
+        q: '5) SI , DI , BX registers contain offset that combined with ..........',
+        options: ['SS', 'CS', 'DS', 'ES'],
+        correct: 2,
+        exp: 'المسجلات BX و SI و DI بتحمل Offset للبيانات يتم دمجه افتراضياً مع مسجل قطاع البيانات DS (Data Segment).'
+      },
+      {
+        id: 'm25-6', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 6',
+        q: '6) With INT 21H / function code = 09H , the offset of displayed string will be in ............',
+        options: ['SI', 'DX', 'DI', 'BX'],
+        correct: 1,
+        exp: 'خدمة طباعة نص (AH = 09H مع INT 21H) بتشترط وضع الـ Offset الخاص ببداية النص في المسجل DX.'
+      },
+      {
+        id: 'm25-7', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 7',
+        q: '7) With INT 16H / function code = 10H , the keyboard character will be delivered to ............',
+        options: ['AL', 'AX', 'DL', 'AH'],
+        correct: 0,
+        exp: 'مقاطعة الكيبورد INT 16H مع AH = 10H بتستقبل الحرف المضغوط وترجعه (ASCII) في المسجل AL.'
+      },
+      {
+        id: 'm25-8', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 8',
+        q: '8) B30: ADD BL, 25 — the label is ..............',
+        options: ['ADD', '25', 'BL', 'B30'],
+        correct: 3,
+        exp: 'الـ Label هو الاسم الرمزي اللي بيسبق الأمر وبينتهي بنقطتين فوق بعض (:)، يعني B30.'
+      },
+      {
+        id: 'm25-9', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 9',
+        q: '9) When you would like to change the address of the IP , the debug command will be .........',
+        options: ['R IP', 'E IP', 'C IP', 'R'],
+        correct: 0,
+        exp: 'في برنامج DEBUG، لتعديل قيمة مسجل معين مثل IP نستخدم أمر Register متبوعاً باسم المسجل: R IP.'
+      },
+      {
+        id: 'm25-10', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 10',
+        q: '10) If the offset of a stack frame is 0542H, then the next offset will be ........',
+        options: ['0544H', '1242H', '0542H', '0543H'],
+        correct: 0,
+        exp: 'كل عنصر في جدول الـ Stack Frame طوله 1 Word (أي 2 Bytes)، وبالتالي العناوين في جدول الـ Stack بتتحرك بمقدار 2 بايت: 0542H + 2 = 0544H.'
+      },
+      {
+        id: 'm25-11', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 11',
+        q: '11) The processor transfers the value 2529H from register into memory addresses 04A26H and 04A27H. The contents of address 04A26H is .........',
+        options: ['27', '4A', '29', '25'],
+        correct: 2,
+        exp: 'حسب قاعدة Little-Endian: البايت الأقل (Low Byte = 29) بيتخزن في العنوان الأصغر (04A26H)، والبايت الأعلى (High Byte = 25) في العنوان الأكبر (04A27H).'
+      },
+      {
+        id: 'm25-12', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 12',
+        q: '12) How many bytes will be transferred from memory in the instruction MOV DI, [1234H] ?',
+        options: ['3', '4', '2', '1'],
+        correct: 2,
+        exp: 'المسجل DI (Destination Index) حجمه 16-bit يعني 2 Bytes! (خلي بالك: في خط الطباعة بيبان DI شبه Dl، بس في نموذج الإجابة الرسمي محلولة 2 لأن المقصود مسجل DI أبو 2 بايت؛ أما لو جالك DL صريحة فيبقى 1 بايت).'
+      },
+      {
+        id: 'm25-13', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 13',
+        q: '13) If your assembly program has one code segment and one data segment, then the .model statement will be ...........',
+        options: ['.MODEL HUGE', '.MODEL SMALL', '.MODEL LARGE', '.MODEL MEDIUM'],
+        correct: 1,
+        exp: 'النموذج .MODEL SMALL هو اللي بيحتوي على 1 Code Segment و 1 Data Segment فقط.'
+      },
+      {
+        id: 'm25-14', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 14',
+        q: '14) Contains set of services to initialize that are attached to the system .........',
+        options: ['BIOS', 'CU', 'ALU', 'CS'],
+        correct: 0,
+        exp: 'الـ BIOS يحتوي على مجموعة الخدمات والـ Routines المسؤولة عن تهيئة وفحص الأجهزة المتصلة بالنظام عند بدء التشغيل.'
+      },
+      {
+        id: 'm25-15', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 15',
+        q: '15) PSP is a .......... bytes long.',
+        options: ['256', '1024', '128', '512'],
+        correct: 0,
+        exp: 'منطقة الـ PSP (Program Segment Prefix) حجمها ثابت ويساوي 256 بايت (100H بايت).'
+      },
+      {
+        id: 'm25-16', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 16',
+        q: '16) A debug command for assemble symbolic instructions onto machine code.',
+        options: ['E', 'A', 'D', 'U'],
+        correct: 1,
+        exp: 'أمر A (Assemble) في الـ DEBUG بيحول أوامر الأسمبلي الرمزية إلى Machine code.'
+      },
+      {
+        id: 'm25-17', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 17',
+        q: '17) The interrupts will be executed with a debug command ..........',
+        options: ['Q', 'T', 'P', 'U'],
+        correct: 2,
+        exp: 'لتنفيذ أمر المقاطعة INT في الـ DEBUG بنستخدم الأمر P (Proceed).'
+      },
+      {
+        id: 'm25-18', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 18',
+        q: '18) A stack segment with SS = 04A2H and SP = 2115H, the physical address used by CPU is ........ H',
+        options: ['06B35H', '25B7H', '2115', '04A2H'],
+        correct: 0,
+        exp: 'العنوان الفيزيائي = (SS × 10H) + SP = 04A20H + 2115H = 06B35H.'
+      },
+      {
+        id: 'm25-19', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 19',
+        q: '19) To define a method in the assembly program, the directive .......... is used.',
+        options: ['PROC', 'Method', 'PUPLIC', 'COMMON'],
+        correct: 0,
+        exp: 'لتعريف دالة أو إجراء (Procedure / Method) في الأسمبلي نستخدم الـ Directive المسمى PROC.'
+      },
+      {
+        id: 'm25-20', cat: 'mid2025', tag: 'ميدتيرم 2025 — سؤال 20',
+        q: '20) Instruction to Access The Current Date:',
+        options: [
+          'INT 16H, with function code 2AH',
+          'INT 21H, with function code 2CH',
+          'INT 21H, with function code 2A',
+          'INT 21H, with function code 09H'
+        ],
+        correct: 2,
+        exp: 'لمعرفة التاريخ الحالي (Current Date) نستخدم INT 21H مع وضع 2A في مسجل AH (بينما 2CH للوقت).'
+      },
+
+      // --- LECTURE 1 QUESTIONS (12 QUESTIONS) ---
+      {
+        id: 'l1-1', cat: 'lec1', tag: 'محاضرة 1 — سؤال 1',
+        q: 'If a computer has an internal memory of 1 MB and a word size of 1 byte, how many bits are needed for the address bus?',
+        options: ['16 bits', '20 bits', '23 bits', '8 bits'],
+        correct: 1,
+        exp: 'Memory size in words = (2^10 * 2^10 * 2^3) / 2^3 = 2^20 words. إذن عدد بتات الـ Address Bus = 20 bits.'
+      },
+      {
+        id: 'l1-2', cat: 'lec1', tag: 'محاضرة 1 — سؤال 2',
+        q: 'Suppose a processor has a 4 MB internal memory and a word size of 1 byte. How many bits are required for the address bus?',
+        options: ['20 bits', '21 bits', '22 bits', '24 bits'],
+        correct: 2,
+        exp: '4 MB = 2^2 * 2^20 bytes = 2^22 words. إذن نحتاج 22 bits للـ Address Bus.'
+      },
+      {
+        id: 'l1-3', cat: 'lec1', tag: 'محاضرة 1 — سؤال 3',
+        q: 'In the Intel 8086 processor (16-bit data bus, word size = 1 byte), how many words can be fetched from memory at a time?',
+        options: ['1 word', '2 words', '4 words', '16 words'],
+        correct: 1,
+        exp: 'Words fetched at a time = Data Bus (16 bits) / Word Size (8 bits) = 2 words.'
+      },
+      {
+        id: 'l1-4', cat: 'lec1', tag: 'محاضرة 1 — سؤال 4',
+        q: 'If a processor has a 32-bit data bus and a word size of 2 bytes, how many words can be fetched from memory at a time?',
+        options: ['1 word', '2 words', '4 words', '8 words'],
+        correct: 1,
+        exp: 'Word size = 2 bytes = 16 bits. إذن 32 bits / 16 bits = 2 words.'
+      },
+      {
+        id: 'l1-5', cat: 'lec1', tag: 'محاضرة 1 — سؤال 5',
+        q: 'We want to store the value 0529H in memory at addresses 04A26H and 04A27H on an Intel x86 processor. Using little-endian, what is stored at each address?',
+        options: [
+          '04A26H contains 05, and 04A27H contains 29',
+          '04A26H contains 29, and 04A27H contains 05',
+          '04A26H contains 92, and 04A27H contains 50',
+          '04A26H contains 0529H in a single 1-byte word'
+        ],
+        correct: 1,
+        exp: 'في الـ Little-Endian البايت الأقل (29) يسكن في العنوان الأصغر (04A26H) والبايت الأعلى (05) في العنوان الأكبر (04A27H).'
+      },
+      {
+        id: 'l1-6', cat: 'lec1', tag: 'محاضرة 1 — سؤال 6',
+        q: 'Given a segment start address of 04F00H and an offset of 0003H, what is the 20-bit absolute address?',
+        options: ['04F30H', '04F03H', '07F00H', '04F003H'],
+        correct: 1,
+        exp: 'Absolute address = Segment start address + Offset = 04F00H + 0003H = 04F03H.'
+      },
+      {
+        id: 'l1-7', cat: 'lec1', tag: 'محاضرة 1 — سؤال 7',
+        q: 'Given a segment start address of 04C00H and an offset of 04A2H, what is the absolute address?',
+        options: ['04CA2H', '050A2H', '040A2H', '05CA2H'],
+        correct: 1,
+        exp: '04C00H + 04A2H: في خانة المئات C (12) + 4 = 16 = 10H (نكتب 0 ونرفع 1 على الـ 4 تصبح 5) فيكون الناتج 050A2H.'
+      },
+      {
+        id: 'l1-8', cat: 'lec1', tag: 'محاضرة 1 — سؤال 8',
+        q: 'What is the 20-bit binary address 0001 0001 0010 0010 1111 in hexadecimal format?',
+        options: ['0x1122E', '0x1122F', '0x2244F', '0x1144F'],
+        correct: 1,
+        exp: 'بتقسيم كل 4 بتات: 0001=1, 0001=1, 0010=2, 0010=2, 1111=F أي 0x1122F.'
+      },
+      {
+        id: 'l1-9', cat: 'lec1', tag: 'محاضرة 1 — سؤال 9',
+        q: 'According to the Intel 8086 1 MB Memory Map, what are the sizes of RAM, Video Display RAM, and ROM respectively?',
+        options: [
+          '512K RAM, 256K Video Display RAM, 256K ROM',
+          '640K RAM, 128K Video Display RAM, 256K ROM',
+          '640K RAM, 256K Video Display RAM, 128K ROM',
+          '768K RAM, 128K Video Display RAM, 128K ROM'
+        ],
+        correct: 1,
+        exp: 'في سلايد 24: RAM = 640K، و Video Display RAM = 128K، و ROM = 256K (مجموعهم 1024K = 1 MB).'
+      },
+      {
+        id: 'l1-10', cat: 'lec1', tag: 'محاضرة 1 — سؤال 10',
+        q: 'Which unit inside the Intel 8086 contains the Segment Registers (CS, DS, SS, ES) and the Instruction Queue?',
+        options: ['EU (Execution Unit)', 'BIU (Bus Interface Unit)', 'ALU (Arithmetic and Logic Unit)', 'RAM'],
+        correct: 1,
+        exp: 'وحدة الـ BIU (Bus Interface Unit) هي التي تحتوي على مسجلات القطاعات (CS, DS, SS, ES) وطابور الأوامر (Instruction Queue).'
+      },
+      {
+        id: 'l1-11', cat: 'lec1', tag: 'محاضرة 1 — سؤال 11',
+        q: 'Which level of programming consists of instructions in a symbolic format designed for a specific processor and has a 1-to-1 correspondence with machine code?',
+        options: ['High-level language', 'Low-level assembly language', 'Machine language', 'Operating system language'],
+        correct: 1,
+        exp: 'لغة الأسمبلي (Low-level assembly language) تستخدم صيغة رمزية لمعالج محدد وتترجم 1-to-1 إلى Machine code بواسطة الـ Assembler.'
+      },
+      {
+        id: 'l1-12', cat: 'lec1', tag: 'محاضرة 1 — سؤال 12',
+        q: 'In the Memory and Addresses table (Slide 17), what hexadecimal address comes immediately after 0049H?',
+        options: ['0050H', '004AH', '0040H', '005AH'],
+        correct: 1,
+        exp: 'في النظام الست عشري (Hexadecimal)، بعد الرقم 9 يأتي الحرف A، لذا 0049H + 1 = 004AH.'
+      },
+
+      // --- LECTURE 2 QUESTIONS (15 QUESTIONS) ---
+      {
+        id: 'l2-1', cat: 'lec2', tag: 'محاضرة 2 — سؤال 1',
+        q: 'If DS = 038E(0)H and offset = 0032H, what is the actual memory address used by the processor?',
+        options: ['03912H', '03812H', '04100H', '038E2H'],
+        correct: 0,
+        exp: '038E0H + 0032H = 03912H (لأن E + 3 = 14 + 3 = 17 = 11H نكتب 1 ومعانا Carry 1 على الـ 8 تصبح 9).'
+      },
+      {
+        id: 'l2-2', cat: 'lec2', tag: 'محاضرة 2 — سؤال 2',
+        q: 'A segment always begins on a paragraph boundary, which means its starting address is divisible by:',
+        options: ['Decimal 10 (Hex A)', 'Decimal 16 (Hex 10)', 'Decimal 8 (Hex 8)', 'Decimal 20 (Hex 14)'],
+        correct: 1,
+        exp: 'الـ Paragraph boundary يقبل القسمة على 16 بالـ Decimal (أي 10H بالـ Hex).'
+      },
+      {
+        id: 'l2-3', cat: 'lec2', tag: 'محاضرة 2 — سؤال 3',
+        q: 'Which of the following is the ONLY general-purpose register that can be used for indirect addressing such as MOV [BX], AX?',
+        options: ['AX', 'CX', 'DX', 'BX'],
+        correct: 3,
+        exp: 'المسجل BX هو الـ General-purpose register الوحيد المسموح وضعه بين أقواس [BX] للعنونة غير المباشرة.'
+      },
+      {
+        id: 'l2-4', cat: 'lec2', tag: 'محاضرة 2 — سؤال 4',
+        q: 'If the Flag Register has a value of 0F19H, which of the following sets of flags are currently 1 (SET)?',
+        options: ['OF, DF, IF, TF, AF, CF', 'OF, DF, SF, ZF, PF, CF', 'TF, SF, ZF, AF, PF, CF', 'OF, IF, SF, AF, PF'],
+        correct: 0,
+        exp: '0F19H = 0000 1111 0001 1001. البتات 11(OF), 10(DF), 9(IF), 8(TF), 4(AF), 0(CF) كلها بـ 1.'
+      },
+      {
+        id: 'l2-5', cat: 'lec2', tag: 'محاضرة 2 — سؤال 5',
+        q: 'When turning on the power, the processor enters the reset state and executes the first instruction in BIOS ROM at address:',
+        options: ['00000H', '00400H', 'FFFF0H', '05BE0H'],
+        correct: 2,
+        exp: 'عند فتح الباور يضع المعالج CS = FFFF[0]H و IP = 0000H ليبدأ من العنوان FFFF0H.'
+      },
+      {
+        id: 'l2-6', cat: 'lec2', tag: 'محاضرة 2 — سؤال 6',
+        q: 'The Interrupt Vector Table (IVT) begins at location 0 in memory and contains:',
+        options: ['128 2-byte addresses', '256 4-byte addresses in (segment:offset) form', '256 1-byte interrupt codes', '64 4-byte addresses'],
+        correct: 1,
+        exp: 'الـ IVT يبدأ عند العنوان 0 ويحتوي على 256 عنوان، كل عنوان 4 بايت (segment:offset).'
+      },
+      {
+        id: 'l2-7', cat: 'lec2', tag: 'محاضرة 2 — سؤال 7',
+        q: 'When loading an .EXE program, the Program Loader creates a 256-byte Program Segment Prefix (PSP) and loads its address into:',
+        options: ['CS and SS', 'DS and ES', 'AX and BX', 'IP and SP'],
+        correct: 1,
+        exp: 'الـ Program Loader يحجز 256 بايت للـ PSP ويضع عنوانها في مسجلي DS و ES.'
+      },
+      {
+        id: 'l2-8', cat: 'lec2', tag: 'محاضرة 2 — سؤال 8',
+        q: 'Suppose AX = 026BH and SP = 36H. After executing PUSH AX, what are the new value of SP and the byte stored at offset 34H?',
+        options: ['SP = 38H, Offset[34H] = 02H', 'SP = 34H, Offset[34H] = 6BH', 'SP = 34H, Offset[34H] = 02H', 'SP = 35H, Offset[34H] = 6BH'],
+        correct: 1,
+        exp: 'PUSH ينقص SP بمقدار 2 ليصبح 34H، ويخزن البايت الأقل 6BH في العنوان 34H والبايت الأعلى 02H في 35H.'
+      },
+      {
+        id: 'l2-9', cat: 'lec2', tag: 'محاضرة 2 — سؤال 9',
+        q: 'In stack operations, what does it mean if SP reaches 0 (SP = 0)?',
+        options: ['The stack is completely empty', 'The stack is full (at the lowest offset in the stack segment)', 'The processor is in reset state', 'The next instruction is at offset 0'],
+        correct: 1,
+        exp: 'الـ Stack ينمو لأسفل نحو العناوين الأقل، لذا وصول SP إلى 0 يعني امتلاء الـ Stack بالكامل.'
+      },
+      {
+        id: 'l2-10', cat: 'lec2', tag: 'محاضرة 2 — سؤال 10',
+        q: 'Assume the instruction mov AL, [0016] (machine code: A01600) is located at address 05C03H. After it executes, what is the next instruction address?',
+        options: ['05C05H (IP + 2)', '05C06H (IP + 3)', '05C19H (IP + 16)', '05C04H (IP + 1)'],
+        correct: 1,
+        exp: 'الـ Machine code هو A0 16 00 (3 بايت)، فيزداد IP بمقدار 3 ويصبح العنوان التالي 05C03H + 3 = 05C06H.'
+      },
+      {
+        id: 'l2-11', cat: 'lec2', tag: 'محاضرة 2 — سؤال 11',
+        q: 'Assume DS = 05D1H and AX = 0248H. When executing mov [0016], AX, what values are stored in memory?',
+        options: ['05D26H gets 02H, and 05D27H gets 48H', '05D26H gets 48H, and 05D27H gets 02H', 'Only 05D26H gets 48H', '05D16H gets 48H, and 05D17H gets 02H'],
+        correct: 1,
+        exp: 'العنوان الفعلي = 05D10H + 0016H = 05D26H. يوضع AL (48H) في 05D26H ويوضع AH (02H) في 05D27H.'
+      },
+      {
+        id: 'l2-12', cat: 'lec2', tag: 'محاضرة 2 — سؤال 12',
+        q: 'Which register pair is used together for MUL and DIV of large numbers?',
+        options: ['AX and BX', 'CX and DX', 'DX and AX (DX:AX)', 'CS and IP'],
+        correct: 2,
+        exp: 'يستخدم DX مع AX في صورة DX:AX لعمليات الضرب والقسمة للأعداد الكبيرة.'
+      },
+      {
+        id: 'l2-13', cat: 'lec2', tag: 'محاضرة 2 — سؤال 13',
+        q: 'What is the main structural difference between .COM and .EXE programs?',
+        options: [
+          '.COM has separate segments, while .EXE uses one segment',
+          '.COM consists of one segment for code, data, and stack, while .EXE uses separate segments',
+          '.COM cannot be loaded into memory',
+          '.EXE does not use a PSP'
+        ],
+        correct: 1,
+        exp: 'ملف .COM يتكون من Segment واحد فقط، بينما .EXE يستخدم Segments منفصلة للكود والداتا والـ Stack.'
+      },
+      {
+        id: 'l2-14', cat: 'lec2', tag: 'محاضرة 2 — سؤال 14',
+        q: 'In the instruction MOV CX, [BX], the operand [BX] represents:',
+        options: ['The immediate number BX', 'The offset address in the Data Segment (DS:BX)', 'The offset address in the Code Segment (CS:BX)', 'The top of the stack (SS:BX)'],
+        correct: 1,
+        exp: 'الأقواس في [BX] تعني أن BX يحتوي على Offset داخل الـ Data Segment أي DS:BX.'
+      },
+      {
+        id: 'l2-15', cat: 'lec2', tag: 'محاضرة 2 — سؤال 15',
+        q: 'Where does the BIOS Data Area begin in memory, and what does it store?',
+        options: [
+          'Begins at 00000H; stores interrupt vectors',
+          'Begins at 40[0]H (00400H); stores the status of attached devices',
+          'Begins at FFFF0H; stores the bootstrap loader',
+          'Begins at 04F00H; stores the user stack'
+        ],
+        correct: 1,
+        exp: 'تبدأ منطقة BIOS Data Area عند العنوان 40[0]H (أي 00400H) وتحتفظ بحالة الأجهزة المتصلة.'
+      },
+
+      // --- LECTURES 3 & 4 SLIDE 36-37 QUESTIONS (20 QUESTIONS) ---
+      {
+        id: 'l34-1', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 1',
+        q: 'Translator which is used to convert codes of assembly language into machine language is termed as -----',
+        options: ['Assembler', 'attempter', 'Compiler', 'Debugger'],
+        correct: 0,
+        exp: 'الـ Assembler هو المترجم الذي يحول كود الأسمبلي إلى Machine Language.'
+      },
+      {
+        id: 'l34-2', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 2',
+        q: '------- is the optional file used by assembler to see which instructions reference which data items.',
+        options: ['PROG.OBJ', 'PROG.LST', 'PROG.CRF', 'PROG.ASM'],
+        correct: 2,
+        exp: 'ملف الـ Cross-Reference (.CRF) هو الذي يوضح أي الأوامر تشير إلى أي متغيرات (Data items).'
+      },
+      {
+        id: 'l34-3', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 3',
+        q: 'Which of the following is a VALID identifier in a data segment (while AT&T, EBX, and 23AC are invalid)?',
+        options: ['$50 (Valid — while AT&T, EBX, 23AC are Invalid)', 'AT&T', 'EBX', '23AC'],
+        correct: 0,
+        exp: 'في شريحة 36: الاسم $50 صحيح لأن الرمز $ مسموح، بينما AT&T و EBX و 23AC كلها غير صالحة (Invalid) بسبب الرمز & واسم المسجل المحجوز والبدء برقم.'
+      },
+      {
+        id: 'l34-4', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 4',
+        q: 'If X is defined in a data segment with X DB 82 and MOV AL, X is executed, then the value in AL will be -------',
+        options: ['82', '52', '0082', '0F'],
+        correct: 1,
+        exp: 'الـ 82 هنا Decimal، عند تخزينها في AL تتحول لـ Hex: 82 / 16 = 5 والباقي 2 أي 52H.'
+      },
+      {
+        id: 'l34-5', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 5',
+        q: "If X is defined in a data segment with X DB '82' and MOV AL, X is executed, then the value in AL will be -------",
+        options: ['82', '38', '32', '00'],
+        correct: 1,
+        exp: "بين علامات تنصيص '82' يعني حروف ASCII! المسجل AL يأخذ أول بايت وهو الحرف '8' وقيمته بالـ Hex هي 38H."
+      },
+      {
+        id: 'l34-6', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 6',
+        q: 'If X is defined in a data segment with X DB 5 DUP(15) and MOV AL, X is executed, then the value in AL will be -------',
+        options: ['15', '5', '0F', 'F'],
+        correct: 2,
+        exp: 'الرقم 15 بالعشري يتحول في بايت كامل (AL) بالـ Hex إلى 0FH.'
+      },
+      {
+        id: 'l34-7', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 7',
+        q: 'DT defines a data type for...',
+        options: ['Terabytes', 'Tenbytes', 'Farword', 'Backword'],
+        correct: 1,
+        exp: 'DT اختصار Define Tenbytes (حجمها 10 بايت).'
+      },
+      {
+        id: 'l34-8', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 8',
+        q: "If X is defined with X DB 3 DUP (2 DUP (2 DUP ('5'))) and MOV AL, X is executed, then the value in AL will be ...",
+        options: ['05', '05050505050505', '35', 'Invalid Instruction'],
+        correct: 2,
+        exp: "أول بايت في X هو الحرف '5'، وكود الـ ASCII للحرف '5' بالـ Hex هو 35H."
+      },
+      {
+        id: 'l34-9', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 9',
+        q: 'If the segment size is 256K, then the segment offsets will be in ------- bits.',
+        options: ['18', '16', '20', '4'],
+        correct: 0,
+        exp: '256K = 2^8 * 2^10 = 2^18، إذن نحتاج 18 bits للـ Offset.'
+      },
+      {
+        id: 'l34-10', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 10',
+        q: 'A Computer uses a memory unit with 256K words of 32 bits each. An instruction in 1 word has: indirect bit (1 bit), opcode, and address (18 bits). How many bits are used for the operation code?',
+        options: ['18', '19', '13', '32'],
+        correct: 2,
+        exp: 'حجم الـ Word هو 32 بت. نطرح 18 بت للعنوان و 1 بت للـ Indirect bit: 32 - 18 - 1 = 13 bits.'
+      },
+      {
+        id: 'l34-11', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 11',
+        q: 'If a microprocessor uses 6 bits for operation code, then the maximum number of operations supported in this system is -------',
+        options: ['6', '12', '64', '512'],
+        correct: 2,
+        exp: 'عدد العمليات = 2^6 = 64 عملية.'
+      },
+      {
+        id: 'l34-12', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 12',
+        q: 'If CS=1000H, IP=2000H, the address of next instruction executed by the microprocessor is -------',
+        options: ['20000H', '10200H', '12000H', '10000H'],
+        correct: 2,
+        exp: 'العنوان الفيزيائي = 10000H + 2000H = 12000H.'
+      },
+      {
+        id: 'l34-13', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 13',
+        q: 'In the data definition: Std DD 1,6,5,8,9 — assume Std begins at offset 2002H. The offset of the second value (6) is:',
+        options: ['2003H', '2006H', '2004H', '2008H'],
+        correct: 1,
+        exp: 'النوع DD (Doubleword) حجمه 4 بايت، فيكون العنصر الثاني عند 2002H + 4 = 2006H.'
+      },
+      {
+        id: 'l34-14', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 14',
+        q: 'Assume that the AX register contains the value 6521H. The content of AX after execution of SUB AL, AH is:',
+        options: ['65BCH', '6544H', '4421H', 'None of these'],
+        correct: 0,
+        exp: 'AH=65H و AL=21H. بطرح AL = 21H - 65H = BCH، وتظل AH=65H فيصبح AX = 65BCH.'
+      },
+      {
+        id: 'l34-15', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 15',
+        q: 'Let W be an array of Words, one of the following is a correct code to set the fifth element in W to 100:',
+        options: ['MOV [W+10], 100', 'MOV [W+2*4], 100', 'MOV [W+5], 100', 'None of these'],
+        correct: 1,
+        exp: 'العنصر الخامس يعني Index = 4، وحجم الـ Word هو 2 بايت، فتكون الإزاحة 2 * 4.'
+      },
+      {
+        id: 'l34-16', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 16',
+        q: 'If SS=90A3H then the range of physical addresses for the stack segment is:',
+        options: ['00000H-090A3H', '090A3H-190A2H', '90A30H-9FA30H', '90A30H-A0A2FH'],
+        correct: 3,
+        exp: 'البداية = 90A30H، والنهاية = 90A30H + FFFFH = A0A2FH.'
+      },
+      {
+        id: 'l34-17', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 17',
+        q: 'To accept the characters from the keyboard, the interrupt ------- with function code ------- will be used.',
+        options: ['INT 16 / AH=10', 'INT 16 / AL=10', 'INT 21 / AH=10', 'INT 21 / AH=09'],
+        correct: 0,
+        exp: 'استقبال الحروف من الكيبورد يتم عبر INT 16 مع وضع 10 في مسجل AH.'
+      },
+      {
+        id: 'l34-18', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 18',
+        q: 'In the debug program, we will use the ------- command to execute the interrupt.',
+        options: ['T', 'P', 'G', 'A'],
+        correct: 1,
+        exp: 'نستخدم الأمر P (Proceed) لتنفيذ المقاطعة INT في خطوة واحدة.'
+      },
+      {
+        id: 'l34-19', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 19',
+        q: 'The register that holds a count for some instructions is:',
+        options: ['CX', 'BX', 'DX', 'AX'],
+        correct: 0,
+        exp: 'المسجل CX هو مسجل العداد (Count Register) للـ Loops والـ Shifts.'
+      },
+      {
+        id: 'l34-20', cat: 'lec34', tag: 'محاضرة 3 & 4 — سؤال 20',
+        q: 'The size of RAX register is:',
+        options: ['64-bit', '32-bit', '18-bit', '16-bit'],
+        correct: 0,
+        exp: 'AL/AH = 8-bit, AX = 16-bit, EAX = 32-bit, RAX = 64-bit.'
+      }
+    ];
+
+    let activeQFilter = 'mid2025';
+    let studyShowAll = true;
+    const userPickedAnswers = {};
+
+    function setQuestionFilter(filterCat) {
+      activeQFilter = filterCat;
+      document.querySelectorAll('.qfilter-btn').forEach(btn => {
+        if (btn.getAttribute('data-qfilter') === filterCat) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      renderMasterQuestions();
+    }
+
+    document.querySelectorAll('.qfilter-btn').forEach(btn => {
+      btn.addEventListener('click', () => setQuestionFilter(btn.getAttribute('data-qfilter')));
+    });
+
+    document.getElementById('studyModeShowAllBtn').addEventListener('click', () => {
+      studyShowAll = true;
+      renderMasterQuestions();
+    });
+
+    document.getElementById('studyModeHideAllBtn').addEventListener('click', () => {
+      studyShowAll = false;
+      renderMasterQuestions();
+    });
+
+    function renderMasterQuestions(searchTerm = '') {
+      const container = document.getElementById('masterQuestionsGrid');
+      const filtered = allQuestions.filter(item => {
+        if (searchTerm) {
+          return item.q.toLowerCase().includes(searchTerm) ||
+                 item.exp.toLowerCase().includes(searchTerm) ||
+                 item.options.some(o => o.toLowerCase().includes(searchTerm));
+        }
+        return activeQFilter === 'all' || item.cat === activeQFilter;
+      });
+
+      let correctCount = 0;
+      allQuestions.forEach(item => {
+        if (userPickedAnswers[item.id] === item.correct) correctCount++;
+      });
+      document.getElementById('masterScoreText').textContent = `${correctCount} / ${allQuestions.length}`;
+
+      container.innerHTML = filtered.map(item => {
+        const picked = userPickedAnswers[item.id];
+        const showAns = studyShowAll || picked !== undefined;
+
+        const optsHtml = item.options.map((opt, oIdx) => {
+          let cls = 'border-white/10 bg-black/40 hover:bg-white/[0.06] text-slate-200';
+          if (showAns) {
+            if (oIdx === item.correct) {
+              cls = 'border-emerald-500 bg-emerald-500/20 text-emerald-200 font-bold';
+            } else if (picked === oIdx && picked !== item.correct) {
+              cls = 'border-rose-500 bg-rose-500/20 text-rose-300 line-through';
+            } else {
+              cls = 'border-white/5 bg-black/20 text-slate-400';
+            }
+          }
+          return `
+            <button type="button" data-qid="${item.id}" data-oidx="${oIdx}"
+              class="master-opt-btn ltr-block w-full p-2.5 rounded-xl border text-xs sm:text-sm transition flex items-center gap-2.5 ${cls}">
+              <span class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center font-bold text-xs shrink-0">${oIdx + 1}</span>
+              <span class="flex-1 text-left">${opt}</span>
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div class="glass-panel rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30">${item.tag}</span>
+                ${showAns && picked !== undefined ? `<span class="text-xs font-bold ${picked === item.correct ? 'text-emerald-400' : 'text-rose-400'}">${picked === item.correct ? '✔ إجابة صحيحة' : '✘ راجع التفسير'}</span>` : ''}
+              </div>
+              <div class="ltr-block font-bold text-sm sm:text-base text-white leading-relaxed">${item.q}</div>
+              <div class="grid grid-cols-1 gap-2 pt-1">${optsHtml}</div>
+            </div>
+            <div class="${showAns ? '' : 'hidden'} p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-slate-200 leading-relaxed">
+              <strong class="text-emerald-400 block mb-0.5">💡 الشرح والحل:</strong>
+              ${item.exp}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.master-opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qId = btn.getAttribute('data-qid');
+          const oIdx = parseInt(btn.getAttribute('data-oidx'), 10);
+          userPickedAnswers[qId] = oIdx;
+          renderMasterQuestions(globalSearchInput.value.trim().toLowerCase());
+        });
+      });
+    }
+
+    renderMasterQuestions();
+
+    // =========================================================================
+    // 8. SPEEDRUN COCKPIT ENGINE (WITH CONFIGURABLE TIMER & MISTAKE RE-QUEUE)
+    // =========================================================================
+    const speedrunModal = document.getElementById('speedrunModal');
+    const openSpeedrunBtn = document.getElementById('openSpeedrunBtn');
+    const closeSpeedrunBtn = document.getElementById('closeSpeedrunBtn');
+    const speedrunDeckSelect = document.getElementById('speedrunDeckSelect');
+    const srCustomTimerInput = document.getElementById('srCustomTimerInput');
+    const srCountdownBadge = document.getElementById('srCountdownBadge');
+
+    let srQueue = [];
+    let srIndex = 0;
+    let srCorrectCount = 0;
+    let srRequeuedCount = 0;
+    let srTimerSeconds = 30;
+    let srRemaining = 30;
+    let srInterval = null;
+    let srAnsweredCurrent = false;
+
+    function buildSpeedrunQueue() {
+      const deck = speedrunDeckSelect.value;
+      srQueue = allQuestions.filter(q => deck === 'all' || q.cat === deck).map(q => ({ ...q }));
+      srIndex = 0;
+      srCorrectCount = 0;
+      srRequeuedCount = 0;
+      renderSpeedrunCard();
+    }
+
+    function stopSrTimer() {
+      if (srInterval) {
+        clearInterval(srInterval);
+        srInterval = null;
+      }
+    }
+
+    function updateSrBadge() {
+      if (srTimerSeconds <= 0) {
+        srCountdownBadge.textContent = 'OFF';
+        return;
+      }
+      const mins = String(Math.floor(srRemaining / 60)).padStart(2, '0');
+      const secs = String(srRemaining % 60).padStart(2, '0');
+      srCountdownBadge.textContent = `${mins}:${secs}`;
+    }
+
+    function startSrTimer() {
+      stopSrTimer();
+      if (srTimerSeconds <= 0) {
+        updateSrBadge();
+        return;
+      }
+      srRemaining = srTimerSeconds;
+      updateSrBadge();
+      srInterval = setInterval(() => {
+        if (srAnsweredCurrent) return;
+        srRemaining--;
+        updateSrBadge();
+        if (srRemaining <= 0) {
+          stopSrTimer();
+          handleSrTimeout();
+        }
+      }, 1000);
+    }
+
+    function requeueCurrentQuestion() {
+      const currentItem = srQueue[srIndex];
+      const insertPos = Math.min(srIndex + 3, srQueue.length);
+      srQueue.splice(insertPos, 0, { ...currentItem });
+      srRequeuedCount++;
+    }
+
+    function handleSrTimeout() {
+      srAnsweredCurrent = true;
+      requeueCurrentQuestion();
+      const item = srQueue[srIndex];
+      const expBox = document.getElementById('srExplanationBox');
+      expBox.className = 'p-4 rounded-xl border border-rose-500/40 bg-rose-500/15 text-xs sm:text-sm text-rose-200';
+      expBox.innerHTML = `<strong>⏰ انتهى الوقت! (تمت إعادة جدولة السؤال بعد 3 أسئلة)</strong><br/>الإجابة الصحيحة رقم ${item.correct + 1}: ${item.exp}`;
+      renderSrOptionsHighlight(-1);
+    }
+
+    function renderSrOptionsHighlight(pickedIdx) {
+      const item = srQueue[srIndex];
+      const btns = document.querySelectorAll('.sr-opt-btn');
+      btns.forEach((b, idx) => {
+        if (idx === item.correct) {
+          b.className = 'sr-opt-btn ltr-block p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-500/20 text-emerald-200 font-bold text-sm flex items-center gap-3';
+        } else if (idx === pickedIdx) {
+          b.className = 'sr-opt-btn ltr-block p-3.5 rounded-xl border-2 border-rose-500 bg-rose-500/20 text-rose-200 line-through text-sm flex items-center gap-3';
+        } else {
+          b.className = 'sr-opt-btn ltr-block p-3.5 rounded-xl border border-white/5 bg-black/30 text-slate-500 text-sm flex items-center gap-3';
+        }
+      });
+    }
+
+    function selectSrOption(oIdx) {
+      if (srAnsweredCurrent) return;
+      srAnsweredCurrent = true;
+      stopSrTimer();
+      const item = srQueue[srIndex];
+      const expBox = document.getElementById('srExplanationBox');
+      if (oIdx === item.correct) {
+        srCorrectCount++;
+        expBox.className = 'p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-xs sm:text-sm text-emerald-200';
+        expBox.innerHTML = `<strong>✔ إجابة صحيحة!</strong> ${item.exp}`;
+      } else {
+        requeueCurrentQuestion();
+        expBox.className = 'p-4 rounded-xl border border-rose-500/40 bg-rose-500/15 text-xs sm:text-sm text-rose-200';
+        expBox.innerHTML = `<strong>✘ إجابة خاطئة (تمت إعادة جدولة السؤال بعد 3 أسئلة)</strong><br/>${item.exp}`;
+      }
+      renderSrOptionsHighlight(oIdx);
+      document.getElementById('srStatsText').textContent = `Correct: ${srCorrectCount} | Re-queued: ${srRequeuedCount}`;
+    }
+
+    function renderSpeedrunCard() {
+      if (!srQueue.length) return;
+      srAnsweredCurrent = false;
+      const item = srQueue[srIndex];
+      document.getElementById('srProgressText').textContent = `Question ${srIndex + 1} / ${srQueue.length}`;
+      document.getElementById('srStatsText').textContent = `Correct: ${srCorrectCount} | Re-queued: ${srRequeuedCount}`;
+      document.getElementById('srQuestionBadge').textContent = item.tag;
+      document.getElementById('srQuestionText').textContent = item.q;
+
+      const expBox = document.getElementById('srExplanationBox');
+      expBox.className = 'hidden';
+      expBox.innerHTML = '';
+
+      const grid = document.getElementById('srOptionsGrid');
+      grid.innerHTML = item.options.map((opt, idx) => `
+        <button type="button" data-sropt="${idx}" class="sr-opt-btn ltr-block p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-slate-100 text-sm transition flex items-center gap-3">
+          <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 font-mono font-extrabold text-xs flex items-center justify-center shrink-0">${idx + 1}</span>
+          <span class="flex-1 text-left">${opt}</span>
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.sr-opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectSrOption(parseInt(btn.getAttribute('data-sropt'), 10)));
+      });
+
+      startSrTimer();
+    }
+
+    openSpeedrunBtn.addEventListener('click', () => {
+      speedrunModal.classList.remove('hidden');
+      buildSpeedrunQueue();
+    });
+
+    closeSpeedrunBtn.addEventListener('click', () => {
+      stopSrTimer();
+      speedrunModal.classList.add('hidden');
+    });
+
+    speedrunDeckSelect.addEventListener('change', buildSpeedrunQueue);
+
+    document.querySelectorAll('.sr-timer-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        srTimerSeconds = parseInt(btn.getAttribute('data-timer'), 10);
+        document.querySelectorAll('.sr-timer-btn').forEach(b => {
+          b.className = 'sr-timer-btn px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono';
+        });
+        btn.className = 'sr-timer-btn px-2 py-1 rounded bg-amber-500 text-black font-bold text-xs font-mono';
+        startSrTimer();
+      });
+    });
+
+    srCustomTimerInput.addEventListener('change', () => {
+      const val = parseInt(srCustomTimerInput.value, 10);
+      if (!isNaN(val) && val >= 5) {
+        srTimerSeconds = val;
+        startSrTimer();
+      }
+    });
+
+    document.getElementById('srPrevBtn').addEventListener('click', () => {
+      if (srIndex > 0) {
+        srIndex--;
+        renderSpeedrunCard();
+      }
+    });
+
+    document.getElementById('srNextBtn').addEventListener('click', () => {
+      if (srIndex < srQueue.length - 1) {
+        srIndex++;
+        renderSpeedrunCard();
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (speedrunModal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') {
+        stopSrTimer();
+        speedrunModal.classList.add('hidden');
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
+        selectSrOption(parseInt(e.key, 10) - 1);
+      } else if (e.key === 'ArrowLeft') {
+        if (srIndex < srQueue.length - 1) { srIndex++; renderSpeedrunCard(); }
+      } else if (e.key === 'ArrowRight') {
+        if (srIndex > 0) { srIndex--; renderSpeedrunCard(); }
+      }
+    });
+  </script>
+</body>
+</html>
